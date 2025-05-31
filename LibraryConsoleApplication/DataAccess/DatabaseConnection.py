@@ -1,20 +1,25 @@
-import psycopg2
+﻿import psycopg2
 import os
 from dotenv import load_dotenv
 from psycopg2.extensions import cursor as PgCursor
+from pathlib import Path
 
-class DatabaseTest:
+
+class DatabaseConnection:
     _instance = None
     _connection = None
 
     def __new__(cls):
         if not cls._instance:
-            cls._instance = super(DatabaseTest, cls).__new__(cls)
+            cls._instance = super(DatabaseConnection, cls).__new__(cls)
         return cls._instance
 
     def __init__(self):
         if not self._connection:
-            load_dotenv()  # بارگذاری فایل .env
+            
+            current_dir = Path(__file__).resolve().parent
+            dotenv_path = current_dir.parent / ".env"
+            load_dotenv(dotenv_path=dotenv_path)  # بارگذاری فایل .env
 
             try:
                 self._connection = psycopg2.connect(
@@ -24,7 +29,6 @@ class DatabaseTest:
                     host=os.getenv("DB_HOST"),
                     port=os.getenv("DB_PORT")
                 )
-                print("Connected to database successfully.")
             except Exception as e:
                 print("Connection error:", e)
 
@@ -39,16 +43,3 @@ class DatabaseTest:
             self._connection.close()
             self._connection = None
             print("Connection closed")
-            
-            
-db = DatabaseTest()
-c1 = db.get_cursor()
-c1.execute('select * from public.\"UserWithoutPasswordView\"')
-res = c1.fetchall()
-print(
-    '\n'.join(
-        map(
-            lambda x : ', '.join(map(str,x)), res
-        )
-    )
-)

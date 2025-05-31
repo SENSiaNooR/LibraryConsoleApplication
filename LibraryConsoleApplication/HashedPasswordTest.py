@@ -24,15 +24,4 @@ class PasswordManager:
 
     def needs_rehash(self, hashed_password: str) -> bool:
         return self.ph.check_needs_rehash(hashed_password)
-    
 
-pass_manager = PasswordManager()
-
-hashed = pass_manager.hash_password('AaAa-=1SENmahdi')
-
-print(f'hashed : {hashed}')
-
-print(pass_manager.verify_password('AaAa-=1SENmahdi', hashed))
-print(pass_manager.verify_password('AaAa-=123SENmahdi', hashed))
-
-print(pass_manager.needs_rehash(hashed))
