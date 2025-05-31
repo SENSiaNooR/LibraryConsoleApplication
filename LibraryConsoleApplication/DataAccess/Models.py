@@ -30,17 +30,17 @@ class LibrarianAction(Enum):
 # SQL Tables
 
 @dataclass
-class Admin:
+class AdminModel:
     user_id : int
 
 @dataclass
-class Author:
+class AuthoModel:
     id : int
     name : str
     biography : Optional[str] = None
     
 @dataclass
-class Book:
+class BookModel:
     id : int
     title : str
     publisher_id : int
@@ -48,17 +48,17 @@ class Book:
     available_copies : int
     
 @dataclass
-class BookAuthor:
+class BookAuthorModel:
     book_id : int
     author_id : int
     
 @dataclass
-class BookCategory:
+class BookCategoryModel:
     book_id : int
     category_id : int
     
 @dataclass
-class BorrowRequest:
+class BorrowRequestModel:
     id : int
     member_id : int
     book_id : int
@@ -69,7 +69,7 @@ class BorrowRequest:
     note : Optional[str] = None
     
 @dataclass
-class Borrowing:
+class BorrowingModel:
     id : int
     member_id : int
     book_id : int
@@ -78,24 +78,24 @@ class Borrowing:
     returned : bool = False
     
 @dataclass
-class Category:
+class CategoryModel:
     id : int
     name : str
     description : Optional[str] = None
     
 @dataclass
-class Guest:
+class GuestModel:
     id : UUID
     create_time : datetime
     request_count : int
     
 @dataclass
-class Librarian:
+class LibrarianModel:
     user_id : int
     name : str
     
 @dataclass
-class LibrarianActivityLog:
+class LibrarianActivityLogModel:
     id : int
     librarian_id : int
     action_type : LibrarianAction
@@ -104,7 +104,7 @@ class LibrarianActivityLog:
     timestamp : datetime
 
 @dataclass
-class Member:
+class MemberModel:
     user_id : int
     name : str
     email : str
@@ -112,7 +112,7 @@ class Member:
     active : bool
 
 @dataclass
-class Message:
+class MessageModel:
     id : int
     user_id : int
     message : Optional[str] = None
@@ -120,7 +120,7 @@ class Message:
     seen : bool
     
 @dataclass
-class Publisher:
+class PublisherModel:
     id : int
     name : str
     address : Optional[str] = None
@@ -128,7 +128,7 @@ class Publisher:
     phone : Optional[str] = None
     
 @dataclass
-class User:
+class UserModel:
     id : int
     username : str
     hashed_password : str
