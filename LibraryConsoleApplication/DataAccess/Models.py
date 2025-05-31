@@ -34,7 +34,7 @@ class AdminModel:
     user_id : int
 
 @dataclass
-class AuthoModel:
+class AuthorModel:
     id : int
     name : str
     biography : Optional[str] = None
@@ -101,7 +101,7 @@ class LibrarianActivityLogModel:
     action_type : LibrarianAction
     book_id : Optional[int] = None
     member_id : Optional[int] = None
-    timestamp : datetime
+    timestamp : Optional[datetime] = None
 
 @dataclass
 class MemberModel:
@@ -116,8 +116,8 @@ class MessageModel:
     id : int
     user_id : int
     message : Optional[str] = None
-    created_time : datetime
-    seen : bool
+    created_time : Optional[datetime] = None
+    seen : bool = False
     
 @dataclass
 class PublisherModel:

@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PsqlConnectionTest.py</StartupFile>
+    <StartupFile>DataAccess\AuthorRepository.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,7 +22,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="DataAccess\DatabaseConnection.py" />
+    <Compile Include="DataAccess\AuthorRepository.py" />
+    <Compile Include="DataAccess\BaseRepository.py" />
+    <Compile Include="DataAccess\Connection.py" />
     <Compile Include="DataAccess\Models.py" />
     <Compile Include="DataAccess\__init__.py" />
     <Compile Include="HashedPasswordTest.py" />

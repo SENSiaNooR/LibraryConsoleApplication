@@ -5,13 +5,13 @@ from psycopg2.extensions import cursor as PgCursor
 from pathlib import Path
 
 
-class DatabaseConnection:
+class DatabaseConnector:
     _instance = None
     _connection = None
 
     def __new__(cls):
         if not cls._instance:
-            cls._instance = super(DatabaseConnection, cls).__new__(cls)
+            cls._instance = super(DatabaseConnector, cls).__new__(cls)
         return cls._instance
 
     def __init__(self):
