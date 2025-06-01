@@ -2,7 +2,7 @@ from Models import AuthorModel
 from BaseRepository import BaseRepository
 from BaseRepository import map_to_model
 
-class BookRepository(BaseRepository):
+class AuthorRepository(BaseRepository):
 
     @map_to_model(AuthorModel)
     def get_all_authors(self):
@@ -13,7 +13,7 @@ class BookRepository(BaseRepository):
 
 
 if __name__ == '__main__':
-    br = BookRepository()
-    a = br.get_all_authors()
+    ar = AuthorRepository()
+    a = ar.get_all_authors()
     for item in a:
         print(item)
