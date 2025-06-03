@@ -1,4 +1,5 @@
 ﻿import os
+from time import sleep
 import jwt
 from datetime import datetime, timedelta
 from typing import Optional, Dict
@@ -35,11 +36,13 @@ class JWTManager:
         except jwt.InvalidTokenError:
             raise ValueError("Invalid Token.")
 
-    def is_token_expired(self, token: str) -> bool:
-        try:
-            jwt.decode(token, self.secret_key, algorithms=[self.algorithm], options={"verify_exp": True})
-            return False
-        except jwt.ExpiredSignatureError:
-            return True
-        except jwt.InvalidTokenError:
-            raise ValueError("Invalid Token.")
+if __name__ == "__main__":
+    jwt_mgr = JWTManager()
+    token = jwt_mgr.create_token({"user_id": 1, "username": "admin"})
+    print("توکن:", token)
+
+    try:
+        data = jwt_mgr.decode_token(token)
+        print("داده:", data)
+    except ValueError as e:
+        print("خطا:", e)
