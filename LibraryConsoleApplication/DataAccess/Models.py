@@ -1,3 +1,5 @@
+from code import interact
+from codecs import StreamReaderWriter
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -24,10 +26,15 @@ class LibrarianAction(Enum):
     accept_borrow_request = 'accept_borrow_request'
     reject_borrow_request = 'reject_borrow_request'
     send_message = 'send_message'
+    
+class UserType(Enum):
+    admin = 'admin'
+    librarian = 'librarian'
+    member = 'member'
 
 
 
-# SQL Tables
+# SQL Table Models
 
 @dataclass
 class AdminModel:
@@ -132,4 +139,107 @@ class UserModel:
     id : int
     username : str
     hashed_password : str
+
+
+
+# SQL View Models
+
+@dataclass
+class AdminVeiwModel:
+    id : int
+    username : str
+    hashed_password : str
    
+@dataclass
+class AuthorViewModel:
+    id : int
+    name : str
+    books : Optional[str] = None
+    biography : Optional[str] = None
+
+@dataclass
+class BookViewModel:
+    id : int
+    title : str
+    publisher : str
+    author : str    
+    category : str
+    total_copies : int
+    available_copies : int
+    
+@dataclass
+class BorrowingViewModel:
+    id : int
+    name : str
+    book : str
+    start_date : datetime
+    end_date : Optional[datetime] = None
+    returned : bool = False
+    
+@dataclass
+class CategoryViewModel:
+    id : int
+    name : str
+    books : Optional[str] = None
+    description : Optional[str] = None
+    
+@dataclass
+class LibrarianActivityLogViewModel:
+    id : int
+    librarian_name : str
+    action_type : LibrarianAction
+    book : Optional[str] = None
+    member : Optional[str] = None
+    timestamp : Optional[datetime] = None
+
+@dataclass
+class LibrarianViewModel:
+    id : int
+    name : str
+    username : str
+    hashed_password : str
+    
+@dataclass
+class MemberViewModel:
+    id : int
+    name : str
+    username : str
+    hashed_password : str
+    email : str
+    join_date : datetime
+    active : bool
+    
+@dataclass
+class MembersBorrowRequestViewModel:
+    id : int
+    name : str
+    book : str
+    request_timestamp : datetime
+    status : BorrowRequestStatus
+    handled_at : Optional[datetime] = None
+    handled_by : Optional[str] = None
+    note : Optional[str] = None
+    
+@dataclass
+class PublisherViewModel:
+    id : int
+    name : str
+    address : Optional[str] = None
+    contact_email : Optional[str] = None
+    phone : Optional[str] = None
+    books : Optional[str] = None
+
+@dataclass
+class UserViewModel:
+    id : int
+    username : str
+    hashed_password : str
+    name : Optional[str] = None
+    user_type : UserType
+    
+@dataclass
+class UserWithoutPasswordViewModel:
+    id : int
+    username : str
+    name : Optional[str] = None
+    user_type : UserType
