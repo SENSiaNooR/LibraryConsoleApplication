@@ -1,5 +1,3 @@
-from code import interact
-from codecs import StreamReaderWriter
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
@@ -235,11 +233,11 @@ class UserViewModel:
     username : str
     hashed_password : str
     name : Optional[str] = None
-    user_type : UserType
+    user_type : Optional[UserType] = None
     
 @dataclass
 class UserWithoutPasswordViewModel:
     id : int
     username : str
     name : Optional[str] = None
-    user_type : UserType
+    user_type : Optional[UserType] = None

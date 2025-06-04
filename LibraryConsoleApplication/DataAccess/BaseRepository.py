@@ -1,22 +1,58 @@
 from Connection import DatabaseConnector
-from typing import Type, TypeVar, Callable
+from psycopg2.extensions import connection as PgConnection, cursor as PgCursor
+from typing import Type, TypeVar, Callable, Union
 from functools import wraps
+import inspect
 
 T = TypeVar("T")
 
 class BaseRepository:
-    def __init__(self):
-        self.db = DatabaseConnector()
+    _db = DatabaseConnector()
 
-    def get_cursor(self):
-        return self.db.get_cursor()
+    @classmethod
+    def _get_connection(cls) -> PgConnection:
+        return cls._db.get_connection()    
+
+    @classmethod
+    def _get_cursor(cls) -> PgCursor:
+        return cls._db.get_cursor()
 
 
 def map_to_model(model_class: Type[T]):
     def decorator(func: Callable[..., list[tuple]]) -> Callable[..., list[T]]:
+        
         @wraps(func)
         def wrapper(*args, **kwargs) -> list[T]:
+            
             rows = func(*args, **kwargs)
+            
             return [model_class(*row) for row in rows]
+        
         return wrapper
+    
+    return decorator
+
+
+class MultipleRowsReturnedError(Exception):
+    """Raised when more than one row is returned in a single-row query."""
+    pass
+
+def map_to_single_model(model_class: Type[T]):
+    def decorator(func: Callable[..., Union[tuple, None]]) -> Callable[..., Union[T, None]]:
+        
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> Union[T, None]:
+            
+            row = func(*args, **kwargs)
+
+            if row is None:
+                return None
+            
+            if isinstance(row, list):
+                raise MultipleRowsReturnedError("Expected a single row (tuple), but got a list.")
+            
+            return model_class(*row)
+        
+        return wrapper
+    
     return decorator

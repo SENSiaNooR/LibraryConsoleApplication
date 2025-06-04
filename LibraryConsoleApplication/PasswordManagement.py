@@ -22,13 +22,13 @@ class PasswordManager:
             parallelism = int(os.getenv("HASH_PARALLELISM"))
         )
 
-        self.check_length = os.getenv("CHECK_LENGTH") == "True"
-        self.min_length = int(os.getenv("MIN_LENGTH"))
-        self.check_letter = os.getenv("CHECK_LETTER") == "True"
-        self.check_digit = os.getenv("CHECK_DIGIT") == "True"
-        self.check_upper = os.getenv("CHECK_UPPER") == "True"
-        self.check_lower = os.getenv("CHECK_LOWER") == "True"
-        self.check_special = os.getenv("CHECK_SPECIAL") == "True"
+        self._check_length = os.getenv("CHECK_LENGTH") == "True"
+        self._min_length = int(os.getenv("MIN_LENGTH"))
+        self._check_letter = os.getenv("CHECK_LETTER") == "True"
+        self._check_digit = os.getenv("CHECK_DIGIT") == "True"
+        self._check_upper = os.getenv("CHECK_UPPER") == "True"
+        self._check_lower = os.getenv("CHECK_LOWER") == "True"
+        self._check_special = os.getenv("CHECK_SPECIAL") == "True"
 
     def hash_password(self, plain_password: str) -> str:
         return self.ph.hash(plain_password)
@@ -45,22 +45,22 @@ class PasswordManager:
     def is_valid_password(self, password: str) -> bool:
         checks = []
 
-        if self.check_length:
-            checks.append(len(password) >= self.min_length)
+        if self._check_length:
+            checks.append(len(password) >= self._min_length)
 
-        if self.check_letter:
+        if self._check_letter:
             checks.append(bool(re.search(r'[A-Za-z]', password)))
 
-        if self.check_digit:
+        if self._check_digit:
             checks.append(bool(re.search(r'\d', password)))
 
-        if self.check_upper:
+        if self._check_upper:
             checks.append(bool(re.search(r'[A-Z]', password)))
 
-        if self.check_lower:
+        if self._check_lower:
             checks.append(bool(re.search(r'[a-z]', password)))
 
-        if self.check_special:
+        if self._check_special:
             checks.append(bool(re.search(r'[!@#$%^&*(),.?":{}|<>]', password)))
 
         return all(checks)
