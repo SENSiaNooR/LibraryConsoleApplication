@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>DataAccess\LibrarianRepository.py</StartupFile>
+    <StartupFile>DataAccess\CategoryRepository.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -38,6 +38,7 @@
     <Compile Include="DataAccess\Models.py" />
     <Compile Include="DataAccess\PublisherRepository.py" />
     <Compile Include="DataAccess\schema.py" />
+    <Compile Include="DataAccess\SqlBuilder.py" />
     <Compile Include="DataAccess\UserRepository.py" />
     <Compile Include="DataAccess\__init__.py" />
     <Compile Include="JWT.py" />
