@@ -1,4 +1,9 @@
 
+class DBTypes:
+    BORROW_REQUEST_STATUS = '"BorrowRequestStatus"'
+    LIBRARIAN_ACTION = '"LibrarianAction"'
+    USER_TYPE = '"UserType"'
+
 class DBTables:
     ADMIN = '"Admin"'
     AUTHOR = '"Author"'
@@ -24,12 +29,13 @@ class DBViews:
     CATEGORY_VIEW = '"CategoryView"'
     LIBRARIAN_VIEW = '"LibrarianView"'
     MEMBER_VIEW = '"MemberView"'
+    MEMBER_WITHOUT_PASSWORD_VIEW = '"MemberWithoutPasswordView"'
     MEMBERS_BORROW_REQUEST_VIEW = '"MembersBorrowRequestView"'
     PUBLISHER_VIEW = '"PublisherView"'
     USER_VIEW = '"UserView"'
     USER_WITHOUT_PASSWORD_VIEW = '"UserWithoutPasswordView"'
 
-class DBColumns:
+class DBTableColumns:
     class Admin:
         USER_ID = "user_id"
     
@@ -118,4 +124,102 @@ class DBColumns:
         ID = "id"
         USERNAME = "username"
         HASHED_PASSWORD = "hashed_password"
+
+
+class DBViewColumns:
+
+    class AdminView:
+        ID = "id"
+        USERNAME = "username"
+        HASHED_PASSWORD = "hashed_password"
+
+    class AuthorView:
+        ID = "id"
+        NAME = "name"
+        BOOKS = "books"
+        BIOGRAPHY = "biography"
+
+    class BookView:
+        ID = "id"
+        TITLE = "title"
+        PUBLISHER = "publisher"
+        AUTHOR = "author"
+        CATEGORY = "category"
+        TOTAL_COPIES = "total_copies"
+        AVAILABLE_COPIES = "available_copies"
+
+    class BorrowingView:
+        ID = "id"
+        NAME = "name"
+        BOOK = "book"
+        START_DATE = "start_date"
+        END_DATE = "end_date"
+        RETURNED = "returned"
+
+    class CategoryView:
+        ID = "id"
+        NAME = "name"
+        BOOKS = "books"
+        DESCRIPTION = "description"
+
+    class LibrarianActivityLogView:
+        ID = "id"
+        LIBRARIAN_NAME = "librarian_name"
+        ACTION_TYPE = "action_type"
+        BOOK = "book"
+        MEMBER = "member"
+        TIMESTAMP = "timestamp"
+
+    class LibrarianView:
+        ID = "id"
+        NAME = "name"
+        USERNAME = "username"
+        HASHED_PASSWORD = "hashed_password"
+
+    class MemberView:
+        ID = "id"
+        NAME = "name"
+        USERNAME = "username"
+        HASHED_PASSWORD = "hashed_password"
+        EMAIL = "email"
+        JOIN_DATE = "join_date"
+        ACTIVE = "active"
         
+    class MemberWithoutPasswordView:
+        ID = "id"
+        NAME = "name"
+        USERNAME = "username"
+        EMAIL = "email"
+        JOIN_DATE = "join_date"
+        ACTIVE = "active"
+
+    class MembersBorrowRequestView:
+        ID = "id"
+        NAME = "name"
+        BOOK = "book"
+        REQUEST_TIMESTAMP = "request_timestamp"
+        STATUS = "status"
+        HANDLED_AT = "handled_at"
+        HANDLED_BY = "handled_by"
+        NOTE = "note"
+
+    class PublisherView:
+        ID = "id"
+        NAME = "name"
+        ADDRESS = "address"
+        CONTACT_EMAIL = "contact_email"
+        PHONE = "phone"
+        BOOKS = "books"
+
+    class UserView:
+        ID = "id"
+        USERNAME = "username"
+        HASHED_PASSWORD = "hashed_password"
+        NAME = "name"
+        USER_TYPE = "user_type"
+
+    class UserWithoutPasswordView:
+        ID = "id"
+        USERNAME = "username"
+        NAME = "name"
+        USER_TYPE = "user_type"       

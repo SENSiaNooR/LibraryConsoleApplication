@@ -208,6 +208,15 @@ class MemberViewModel:
     active : bool
     
 @dataclass
+class MemberWithoutPasswordViewModel:
+    id : int
+    name : str
+    username : str
+    email : str
+    join_date : datetime
+    active : bool
+    
+@dataclass
 class MembersBorrowRequestViewModel:
     id : int
     name : str
