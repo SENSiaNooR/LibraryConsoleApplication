@@ -5,7 +5,7 @@ from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_singl
 from DataAccess.Models import CategoryModel, CategoryViewModel, MemberModel, MemberWithoutPasswordViewModel, PublisherModel, PublisherViewModel, UserModel, UserType
 from DataAccess.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
-from DataAccess.SqlBuilder import build_set_clause, build_where_clause
+from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause
 from DataAccess.UserRepository import UserRepository
 
 
@@ -124,20 +124,19 @@ class PublisherRepository(BaseRepository):
             cursor = cls._get_cursor()
             commit_and_close = True
 
+        columns_clause, placeholders_clause, values = build_insert_clause(model)
+
         query = (
             f"""
             INSERT INTO {DBTables.PUBLISHER} (
-                {DBTableColumns.Publisher.NAME},
-                {DBTableColumns.Publisher.ADDRESS},
-                {DBTableColumns.Publisher.CONTACT_EMAIL},
-                {DBTableColumns.Publisher.PHONE}
+                {columns_clause}
             )
-            VALUES (%s, %s, %s, %s)
+            VALUES ({placeholders_clause})
             RETURNING *
             """
         )
         
-        cursor.execute(query, (model.name, model.address, model.contact_email, model.phone))
+        cursor.execute(query, values)
         result = cursor.fetchone()
         
         if commit_and_close:

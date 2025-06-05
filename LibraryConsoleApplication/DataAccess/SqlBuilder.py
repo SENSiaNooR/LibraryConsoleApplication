@@ -1,23 +1,31 @@
 from dataclasses import asdict
 from typing import Tuple, Any
+from DataAccess.Models import UnsetType
 
 def build_set_clause(model: Any, exclude: set = {"id"}) -> Tuple[str, list]:
     """
-    Produces the SQL SET clause and values for an UPDATE query from a model.
-    
+    Builds the SQL SET clause and corresponding values for an UPDATE query
+    based on the fields of a model object.
+
+    Fields that are instances of `UnsetType` or listed in the `exclude` set 
+    will be ignored in the SET clause.
+
     Args:
-        model: The data model (usually a dataclass).
-        exclude: Set of field names to exclude from the SET clause (e.g., 'id').
+        model (Any): A dataclass-like object containing field data.
+        exclude (set, optional): A set of field names to exclude from the SET clause 
+                                 (commonly 'id'). Defaults to {"id"}.
 
     Returns:
-        Tuple[str, list]: SQL SET clause string, and list of values.
+        Tuple[str, list]:
+            - A string for the SQL SET clause (e.g., `"name = %s, age = %s"`).
+            - A list of values matching the placeholders in the SET clause.
     """
     model_dict = asdict(model)
     pairs = []
     values = []
 
     for key, value in model_dict.items():
-        if key in exclude or value is None:
+        if key in exclude or isinstance(value, UnsetType):
             continue
         pairs.append(f"{key} = %s")
         values.append(value)
@@ -25,35 +33,61 @@ def build_set_clause(model: Any, exclude: set = {"id"}) -> Tuple[str, list]:
     set_clause = ", ".join(pairs)
     return set_clause, values
 
-def build_where_clause(model: Any) -> tuple[str, list]:
+
+def build_where_clause(model: Any) -> Tuple[str, list]:
     """
-    Builds a SQL WHERE clause based on non-None fields of the given model.
+    Builds a SQL WHERE clause and corresponding values based on the 
+    fields of a model object that are not instances of `UnsetType`.
 
-    This function converts the model (e.g., a dataclass or similar object) into a dictionary
-    and generates conditional expressions in the form of `field = %s` for each field
-    that is not None. It then joins these conditions with `AND` and returns both the
-    resulting WHERE clause and the corresponding list of values.
+    Useful for dynamically generating filters from partially filled models.
 
-    Useful for dynamically generating SQL queries where only provided fields should be
-    included in the WHERE clause.
-
-    Parameters:
-        model (Any): A data model object (e.g., a dataclass) to extract fields from.
+    Args:
+        model (Any): A dataclass-like object containing field data.
 
     Returns:
-        tuple[str, list]:
-            - A SQL-safe string representing the WHERE clause 
-              (e.g., `"id = %s AND name = %s"`).
-            - A list of the corresponding non-None values in the same order as the conditions.
+        Tuple[str, list]:
+            - A SQL-safe WHERE clause string (e.g., `"id = %s AND name = %s"`).
+            - A list of values matching the placeholders in the WHERE clause.
     """
     fields = asdict(model)
     conditions = []
     values = []
 
     for field, value in fields.items():
-        if value is not None:
+        if not isinstance(value, UnsetType):
             conditions.append(f"{field} = %s")
             values.append(value)
 
     where_clause = " AND ".join(conditions)
     return where_clause, values
+
+def build_insert_clause(model: Any, exclude: set = {"id"}) -> Tuple[str, str, list]:
+    """
+    Builds SQL column list, placeholder list, and values for an INSERT statement.
+
+    Args:
+        model: The dataclass instance to insert.
+        exclude: Set of field names to exclude from the insert (e.g., 'id').
+
+    Returns:
+        Tuple[str, str, list]:
+            - Column names (e.g., "name, address")
+            - Placeholders (e.g., "%s, %s")
+            - List of values in order
+    """
+    model_dict = asdict(model)
+    columns = []
+    placeholders = []
+    values = []
+
+    for key, value in model_dict.items():
+        if key in exclude or isinstance(value, UnsetType):
+            continue
+        columns.append(key)
+        placeholders.append("%s")
+        values.append(value)
+        
+    columns_clause = ", ".join(columns)
+    placeholders_clause = ", ".join(placeholders)
+    
+    return columns_clause, placeholders_clause, values

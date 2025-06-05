@@ -2,8 +2,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
-from typing import Optional
+from typing import Optional, Union
 
+# Unset type
+
+class UnsetType:   
+    def __repr__(self) -> str:
+        return '<UNSET>'
+
+UNSET = UnsetType()
 
 
 # SQL Types
@@ -34,215 +41,215 @@ class UserType(Enum):
 
 @dataclass
 class AdminModel:
-    user_id: Optional[int] = None
+    user_id: Union[int, None, UnsetType] = UNSET
 
 @dataclass
 class AuthorModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    biography: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    biography: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class BookModel:
-    id: Optional[int] = None
-    title: Optional[str] = None
-    publisher_id: Optional[int] = None
-    total_copy: Optional[int] = None
-    available_copies: Optional[int] = None
+    id: Union[int, None, UnsetType] = UNSET
+    title: Union[str, None, UnsetType] = UNSET
+    publisher_id: Union[int, None, UnsetType] = UNSET
+    total_copies: Union[int, None, UnsetType] = UNSET
+    available_copies: Union[int, None, UnsetType] = UNSET
 
 @dataclass
 class BookAuthorModel:
-    book_id: Optional[int] = None
-    author_id: Optional[int] = None
+    book_id: Union[int, None, UnsetType] = UNSET
+    author_id: Union[int, None, UnsetType] = UNSET
 
 @dataclass
 class BookCategoryModel:
-    book_id: Optional[int] = None
-    category_id: Optional[int] = None
+    book_id: Union[int, None, UnsetType] = UNSET
+    category_id: Union[int, None, UnsetType] = UNSET
 
 @dataclass
 class BorrowRequestModel:
-    id: Optional[int] = None
-    member_id: Optional[int] = None
-    book_id: Optional[int] = None
-    request_timestamp: Optional[datetime] = None
-    status: Optional[BorrowRequestStatus] = None
-    handled_at: Optional[datetime] = None
-    handled_by: Optional[int] = None
-    note: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    member_id: Union[int, None, UnsetType] = UNSET
+    book_id: Union[int, None, UnsetType] = UNSET
+    request_timestamp: Union[datetime, None, UnsetType] = UNSET
+    status: Union[BorrowRequestStatus, None, UnsetType] = UNSET
+    handled_at: Union[datetime, None, UnsetType] = UNSET
+    handled_by: Union[int, None, UnsetType] = UNSET
+    note: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class BorrowingModel:
-    id: Optional[int] = None
-    member_id: Optional[int] = None
-    book_id: Optional[int] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    returned: Optional[bool] = None
+    id: Union[int, None, UnsetType] = UNSET
+    member_id: Union[int, None, UnsetType] = UNSET
+    book_id: Union[int, None, UnsetType] = UNSET
+    start_date: Union[datetime, None, UnsetType] = UNSET
+    end_date: Union[datetime, None, UnsetType] = UNSET
+    returned: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
 class CategoryModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    description: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    description: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class GuestModel:
-    id: Optional[UUID] = None
-    create_time: Optional[datetime] = None
-    request_count: Optional[int] = None
+    id: Union[UUID, None, UnsetType] = UNSET
+    create_time: Union[datetime, None, UnsetType] = UNSET
+    request_count: Union[int, None, UnsetType] = UNSET
 
 @dataclass
 class LibrarianModel:
-    user_id: Optional[int] = None
-    name: Optional[str] = None
+    user_id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class LibrarianActivityLogModel:
-    id: Optional[int] = None
-    librarian_id: Optional[int] = None
-    action_type: Optional[LibrarianAction] = None
-    book_id: Optional[int] = None
-    member_id: Optional[int] = None
-    timestamp: Optional[datetime] = None
+    id: Union[int, None, UnsetType] = UNSET
+    librarian_id: Union[int, None, UnsetType] = UNSET
+    action_type: Union[LibrarianAction, None, UnsetType] = UNSET
+    book_id: Union[int, None, UnsetType] = UNSET
+    member_id: Union[int, None, UnsetType] = UNSET
+    timestamp: Union[datetime, None, UnsetType] = UNSET
 
 @dataclass
 class MemberModel:
-    user_id: Optional[int] = None
-    name: Optional[str] = None
-    email: Optional[str] = None
-    join_date: Optional[datetime] = None
-    active: Optional[bool] = None
+    user_id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    email: Union[str, None, UnsetType] = UNSET
+    join_date: Union[datetime, None, UnsetType] = UNSET
+    active: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
 class MessageModel:
-    id: Optional[int] = None
-    user_id: Optional[int] = None
-    message: Optional[str] = None
-    created_time: Optional[datetime] = None
-    seen: Optional[bool] = None
+    id: Union[int, None, UnsetType] = UNSET
+    user_id: Union[int, None, UnsetType] = UNSET
+    message: Union[str, None, UnsetType] = UNSET
+    created_time: Union[datetime, None, UnsetType] = UNSET
+    seen: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
 class PublisherModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    address: Optional[str] = None
-    contact_email: Optional[str] = None
-    phone: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    address: Union[str, None, UnsetType] = UNSET
+    contact_email: Union[str, None, UnsetType] = UNSET
+    phone: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class UserModel:
-    id: Optional[int] = None
-    username: Optional[str] = None
-    hashed_password: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    username: Union[str, None, UnsetType] = UNSET
+    hashed_password: Union[str, None, UnsetType] = UNSET
 
 # SQL View Models
 
 @dataclass
 class AdminVeiwModel:
-    id: Optional[int] = None
-    username: Optional[str] = None
-    hashed_password: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    username: Union[str, None, UnsetType] = UNSET
+    hashed_password: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class AuthorViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    books: Optional[str] = None
-    biography: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    books: Union[str, None, UnsetType] = UNSET
+    biography: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class BookViewModel:
-    id: Optional[int] = None
-    title: Optional[str] = None
-    publisher: Optional[str] = None
-    author: Optional[str] = None
-    category: Optional[str] = None
-    total_copies: Optional[int] = None
-    available_copies: Optional[int] = None
+    id: Union[int, None, UnsetType] = UNSET
+    title: Union[str, None, UnsetType] = UNSET
+    publisher: Union[str, None, UnsetType] = UNSET
+    author: Union[str, None, UnsetType] = UNSET
+    category: Union[str, None, UnsetType] = UNSET
+    total_copies: Union[int, None, UnsetType] = UNSET
+    available_copies: Union[int, None, UnsetType] = UNSET
 
 @dataclass
 class BorrowingViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    book: Optional[str] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    returned: Optional[bool] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    book: Union[str, None, UnsetType] = UNSET
+    start_date: Union[datetime, None, UnsetType] = UNSET
+    end_date: Union[datetime, None, UnsetType] = UNSET
+    returned: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
 class CategoryViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    books: Optional[str] = None
-    description: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    books: Union[str, None, UnsetType] = UNSET
+    description: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class LibrarianActivityLogViewModel:
-    id: Optional[int] = None
-    librarian_name: Optional[str] = None
-    action_type: Optional[LibrarianAction] = None
-    book: Optional[str] = None
-    member: Optional[str] = None
-    timestamp: Optional[datetime] = None
+    id: Union[int, None, UnsetType] = UNSET
+    librarian_name: Union[str, None, UnsetType] = UNSET
+    action_type: Union[LibrarianAction, None, UnsetType] = UNSET
+    book: Union[str, None, UnsetType] = UNSET
+    member: Union[str, None, UnsetType] = UNSET
+    timestamp: Union[datetime, None, UnsetType] = UNSET
 
 @dataclass
 class LibrarianViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    username: Optional[str] = None
-    hashed_password: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    username: Union[str, None, UnsetType] = UNSET
+    hashed_password: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class MemberViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    username: Optional[str] = None
-    hashed_password: Optional[str] = None
-    email: Optional[str] = None
-    join_date: Optional[datetime] = None
-    active: Optional[bool] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    username: Union[str, None, UnsetType] = UNSET
+    hashed_password: Union[str, None, UnsetType] = UNSET
+    email: Union[str, None, UnsetType] = UNSET
+    join_date: Union[datetime, None, UnsetType] = UNSET
+    active: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
 class MemberWithoutPasswordViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    username: Optional[str] = None
-    email: Optional[str] = None
-    join_date: Optional[datetime] = None
-    active: Optional[bool] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    username: Union[str, None, UnsetType] = UNSET
+    email: Union[str, None, UnsetType] = UNSET
+    join_date: Union[datetime, None, UnsetType] = UNSET
+    active: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
 class MembersBorrowRequestViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    book: Optional[str] = None
-    request_timestamp: Optional[datetime] = None
-    status: Optional[BorrowRequestStatus] = None
-    handled_at: Optional[datetime] = None
-    handled_by: Optional[str] = None
-    note: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    book: Union[str, None, UnsetType] = UNSET
+    request_timestamp: Union[datetime, None, UnsetType] = UNSET
+    status: Union[BorrowRequestStatus, None, UnsetType] = UNSET
+    handled_at: Union[datetime, None, UnsetType] = UNSET
+    handled_by: Union[str, None, UnsetType] = UNSET
+    note: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class PublisherViewModel:
-    id: Optional[int] = None
-    name: Optional[str] = None
-    address: Optional[str] = None
-    contact_email: Optional[str] = None
-    phone: Optional[str] = None
-    books: Optional[str] = None
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    address: Union[str, None, UnsetType] = UNSET
+    contact_email: Union[str, None, UnsetType] = UNSET
+    phone: Union[str, None, UnsetType] = UNSET
+    books: Union[str, None, UnsetType] = UNSET
 
 @dataclass
 class UserViewModel:
-    id: Optional[int] = None
-    username: Optional[str] = None
-    hashed_password: Optional[str] = None
-    name: Optional[str] = None
-    user_type: Optional[UserType] = None
+    id: Union[int, None, UnsetType] = UNSET
+    username: Union[str, None, UnsetType] = UNSET
+    hashed_password: Union[str, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    user_type: Union[UserType, None, UnsetType] = UNSET
 
 @dataclass
 class UserWithoutPasswordViewModel:
-    id: Optional[int] = None
-    username: Optional[str] = None
-    name: Optional[str] = None
-    user_type: Optional[UserType] = None
+    id: Union[int, None, UnsetType] = UNSET
+    username: Union[str, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    user_type: Union[UserType, None, UnsetType] = UNSET

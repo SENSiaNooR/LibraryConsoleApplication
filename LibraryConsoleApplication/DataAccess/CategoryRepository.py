@@ -5,7 +5,7 @@ from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_singl
 from DataAccess.Models import CategoryModel, CategoryViewModel
 from DataAccess.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
-from DataAccess.SqlBuilder import build_set_clause, build_where_clause
+from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause
 
 
 class CategoryRepository(BaseRepository):
@@ -83,10 +83,7 @@ class CategoryRepository(BaseRepository):
 
         query = (
             f"""
-            SELECT 
-                *
-            FROM
-                {DBTables.CATEGORY} 
+            SELECT * FROM {DBTables.CATEGORY} 
             """
         )
         
@@ -110,10 +107,7 @@ class CategoryRepository(BaseRepository):
 
         query = (
             f"""
-            SELECT 
-                *
-            FROM
-                {DBViews.CATEGORY_VIEW} 
+            SELECT * FROM {DBViews.CATEGORY_VIEW} 
             """
         )
         
@@ -134,19 +128,20 @@ class CategoryRepository(BaseRepository):
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
+        
+        columns_clause, placeholders_clause, values = build_insert_clause(model)
 
         query = (
             f"""
             INSERT INTO {DBTables.CATEGORY} (
-                {DBTableColumns.Category.NAME},
-                {DBTableColumns.Category.DESCRIPTION}
+                {columns_clause}
             )
-            VALUES (%s, %s)
+            VALUES ({placeholders_clause})
             RETURNING *
             """
         )
         
-        cursor.execute(query, (model.name, model.description))
+        cursor.execute(query, values)
         result = cursor.fetchone()
         
         if commit_and_close:
