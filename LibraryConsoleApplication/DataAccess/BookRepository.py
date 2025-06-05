@@ -228,7 +228,7 @@ class BookRepository(BaseRepository):
 if __name__ == '__main__':
     
     book_model = BookModel(
-        title='ریاضی دهم',
+        title='ریاضی یازدهم',
         total_copies=20,
         available_copies=20
     )
@@ -271,7 +271,7 @@ if __name__ == '__main__':
         authors_model=author_models,
         categories_model=category_models,
         publisher_model=publisher_model,
-        auto_create_relation=True
+        auto_create_relation=False
     )
 
     print(res)

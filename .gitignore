@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 /LibraryConsoleApplication/env
 /LibraryConsoleApplication/.env
+
+.vscode/*
+!.vscode/launch.json
