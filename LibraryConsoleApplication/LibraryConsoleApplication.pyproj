@@ -30,6 +30,7 @@
     <Compile Include="DataAccess\CategoryRepository.py" />
     <Compile Include="DataAccess\CommonQueriesRepository.py" />
     <Compile Include="DataAccess\Connection.py" />
+    <Compile Include="DataAccess\Exceptions.py" />
     <Compile Include="DataAccess\GuestRepository.py" />
     <Compile Include="DataAccess\LibrarianActivityLogRepository.py" />
     <Compile Include="DataAccess\LibrarianRepository.py" />

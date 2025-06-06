@@ -1,4 +1,5 @@
 from typing import Optional
+from DataAccess.Exceptions import MultipleRowsReturnedError
 from DataAccess.Schema import DBTableColumns, DBTables, DBViews
 from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause
 from Models import AuthorModel, AuthorViewModel
@@ -23,11 +24,14 @@ class AuthorRepository(BaseRepository):
             f"""
             SELECT * FROM {DBTables.AUTHOR} 
             WHERE {where_clause}
-            LIMIT 1
             """
         )
         
         cursor.execute(query, values)
+        
+        if cursor.rowcount > 1:
+            raise MultipleRowsReturnedError()
+        
         result = cursor.fetchone()
         
         if commit_and_close:
@@ -51,11 +55,14 @@ class AuthorRepository(BaseRepository):
             f"""
             SELECT * FROM {DBViews.AUTHOR_VIEW} 
             WHERE {where_clause}
-            LIMIT 1
             """
         )
         
         cursor.execute(query, values)
+        
+        if cursor.rowcount > 1:
+            raise MultipleRowsReturnedError()
+        
         result = cursor.fetchone()
         
         if commit_and_close:
@@ -66,20 +73,32 @@ class AuthorRepository(BaseRepository):
        
     @classmethod
     @map_to_model(AuthorModel)
-    def get_all_authors(cls, cursor : Optional[PgCursor] = None) -> list[AuthorModel]:
+    def get_authors(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> list[AuthorModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        query = (
-            f"""
-            SELECT * FROM {DBTables.AUTHOR} 
-            """
-        )
+        where_clause, values = build_where_clause(model, use_like_for_strings=True)
         
-        cursor.execute(query)
+        if not where_clause:
+            query = (
+                f"""
+                SELECT * FROM {DBTables.AUTHOR} 
+                """
+            )
+            cursor.execute(query)
+            
+        else:
+            query = (
+                f"""
+                SELECT * FROM {DBTables.AUTHOR}
+                WHERE {where_clause}
+                """
+            )
+            cursor.execute(query, values)
+            
         result = cursor.fetchall()
         
         if commit_and_close:
@@ -90,20 +109,32 @@ class AuthorRepository(BaseRepository):
     
     @classmethod
     @map_to_model(AuthorViewModel)
-    def get_all_authors_with_books(cls, cursor : Optional[PgCursor] = None) -> list[AuthorViewModel]:
+    def get_authors_with_books(cls, model : AuthorViewModel, cursor : Optional[PgCursor] = None) -> list[AuthorViewModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        query = (
-            f"""
-            SELECT * FROM {DBViews.AUTHOR_VIEW} 
-            """
-        )
+        where_clause, values = build_where_clause(model, use_like_for_strings=True)
         
-        cursor.execute(query)
+        if not where_clause:
+            query = (
+                f"""
+                SELECT * FROM {DBViews.AUTHOR_VIEW} 
+                """
+            )
+            cursor.execute(query)
+            
+        else:
+            query = (
+                f"""
+                SELECT * FROM {DBViews.AUTHOR_VIEW}
+                WHERE {where_clause}
+                """
+            )
+            cursor.execute(query, values)
+            
         result = cursor.fetchall()
         
         if commit_and_close:
@@ -193,6 +224,7 @@ class AuthorRepository(BaseRepository):
 
 if __name__ == '__main__':
 
-    a = AuthorRepository.get_all_authors()
-    for item in a:
-        print(item)
+    #a = AuthorRepository.get_all_authors()
+    #for item in a:
+    #    print(item)
+    pass

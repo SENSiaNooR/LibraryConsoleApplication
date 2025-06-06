@@ -34,27 +34,36 @@ def build_set_clause(model: Any, exclude: set = {"id"}) -> Tuple[str, list]:
     return set_clause, values
 
 
-def build_where_clause(model: Any) -> Tuple[str, list]:
+def build_where_clause(
+    model: Any,
+    use_like_for_strings: bool = False
+) -> Tuple[str, list]:
     """
-    Builds a SQL WHERE clause and corresponding values based on the 
-    fields of a model object that are not instances of `UnsetType`.
-
-    Useful for dynamically generating filters from partially filled models.
-
+    Builds a SQL WHERE clause based on non-Unset fields of the given model.
+    If `use_like_for_strings` is True, string fields will use `LIKE` instead of `=`.
+    
     Args:
-        model (Any): A dataclass-like object containing field data.
+        model (Any): A dataclass instance.
+        use_like_for_strings (bool): Whether to use LIKE for string fields.
 
     Returns:
-        Tuple[str, list]:
-            - A SQL-safe WHERE clause string (e.g., `"id = %s AND name = %s"`).
-            - A list of values matching the placeholders in the WHERE clause.
+        Tuple[str, list]: SQL WHERE clause string and list of parameter values.
     """
     fields = asdict(model)
     conditions = []
     values = []
 
     for field, value in fields.items():
-        if not isinstance(value, UnsetType):
+        if isinstance(value, UnsetType):
+            continue
+        
+        if value is None:
+            conditions.append(f"{field} IS NULL")
+        
+        elif use_like_for_strings and isinstance(value, str):
+            conditions.append(f"{field} LIKE %s")
+            values.append(f"%{value}%")  # wildcard search
+        else:
             conditions.append(f"{field} = %s")
             values.append(value)
 

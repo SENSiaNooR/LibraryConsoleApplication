@@ -5,6 +5,8 @@ from functools import wraps
 from dataclasses import asdict
 import inspect
 
+from DataAccess.Exceptions import MultipleRowsReturnedError
+
 T = TypeVar("T")
 
 class BaseRepository:
@@ -32,11 +34,6 @@ def map_to_model(model_class: Type[T]):
         return wrapper
     
     return decorator
-
-
-class MultipleRowsReturnedError(Exception):
-    """Raised when more than one row is returned in a single-row query."""
-    pass
 
 def map_to_single_model(model_class: Type[T]):
     def decorator(func: Callable[..., Union[tuple, None]]) -> Callable[..., Union[T, None]]:

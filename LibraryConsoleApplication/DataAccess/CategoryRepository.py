@@ -2,6 +2,7 @@
 from typing import Optional
 from unicodedata import category
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
+from DataAccess.Exceptions import MultipleRowsReturnedError
 from DataAccess.Models import CategoryModel, CategoryViewModel
 from DataAccess.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
@@ -28,11 +29,14 @@ class CategoryRepository(BaseRepository):
             f"""
             SELECT * FROM {DBTables.CATEGORY} 
             WHERE {where_clause}
-            LIMIT 1
             """
         )
         
         cursor.execute(query, values)
+        
+        if cursor.rowcount > 1:
+            raise MultipleRowsReturnedError()
+        
         result = cursor.fetchone()
         
         if commit_and_close:
@@ -43,7 +47,7 @@ class CategoryRepository(BaseRepository):
         
     @classmethod
     @map_to_single_model(CategoryViewModel)
-    def get_category_with_books(cls, model : CategoryModel, cursor : Optional[PgCursor] = None) -> CategoryViewModel:
+    def get_category_view(cls, model : CategoryViewModel, cursor : Optional[PgCursor] = None) -> CategoryViewModel:
         
         commit_and_close = False
         if cursor is None:
@@ -59,11 +63,14 @@ class CategoryRepository(BaseRepository):
             f"""
             SELECT * FROM {DBViews.CATEGORY_VIEW} 
             WHERE {where_clause}
-            LIMIT 1
             """
         )
         
         cursor.execute(query, values)
+        
+        if cursor.rowcount > 1:
+            raise MultipleRowsReturnedError()
+        
         result = cursor.fetchone()
         
         if commit_and_close:
@@ -74,20 +81,32 @@ class CategoryRepository(BaseRepository):
        
     @classmethod
     @map_to_model(CategoryModel)
-    def get_all_categories(cls, cursor : Optional[PgCursor] = None) -> list[CategoryModel]:
+    def get_categories(cls, model : CategoryModel, cursor : Optional[PgCursor] = None) -> list[CategoryModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        query = (
-            f"""
-            SELECT * FROM {DBTables.CATEGORY} 
-            """
-        )
+        where_clause, values = build_where_clause(model, use_like_for_strings=True)
         
-        cursor.execute(query)
+        if not where_clause:
+            query = (
+                f"""
+                SELECT * FROM {DBTables.CATEGORY} 
+                """
+            )
+            cursor.execute(query)
+            
+        else:
+            query = (
+                f"""
+                SELECT * FROM {DBTables.CATEGORY}
+                WHERE {where_clause}
+                """
+            )
+            cursor.execute(query, values)
+            
         result = cursor.fetchall()
         
         if commit_and_close:
@@ -98,20 +117,32 @@ class CategoryRepository(BaseRepository):
     
     @classmethod
     @map_to_model(CategoryViewModel)
-    def get_all_categories_with_books(cls, cursor : Optional[PgCursor] = None) -> list[CategoryViewModel]:
+    def get_categories_view(cls, model : CategoryViewModel, cursor : Optional[PgCursor] = None) -> list[CategoryViewModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        query = (
-            f"""
-            SELECT * FROM {DBViews.CATEGORY_VIEW} 
-            """
-        )
+        where_clause, values = build_where_clause(model, use_like_for_strings=True)
         
-        cursor.execute(query)
+        if not where_clause:
+            query = (
+                f"""
+                SELECT * FROM {DBViews.CATEGORY_VIEW} 
+                """
+            )
+            cursor.execute(query)
+            
+        else:
+            query = (
+                f"""
+                SELECT * FROM {DBViews.CATEGORY_VIEW}
+                WHERE {where_clause}
+                """
+            )
+            cursor.execute(query, values)
+            
         result = cursor.fetchall()
         
         if commit_and_close:

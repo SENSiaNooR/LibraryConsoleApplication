@@ -2,6 +2,7 @@ from typing import Optional
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from DataAccess.BaseRepository import BaseRepository, map_to_single_model
+from DataAccess.Exceptions import MemberAlreadyDeactivatedError
 from DataAccess.Models import MemberModel, MemberWithoutPasswordViewModel, UserModel, UserType
 from DataAccess.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
@@ -143,7 +144,7 @@ class MemberRepository(BaseRepository):
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        user_model = UserRepository.create_user(username, hashed_password, cursor)
+        user_model = UserRepository.add_user(username, hashed_password, cursor)
               
         query = (
             f"""
@@ -172,6 +173,3 @@ class MemberRepository(BaseRepository):
         return result
 
 
-class MemberAlreadyDeactivatedError(Exception):
-    """Raised when trying to deactivate a member who is already inactive."""
-    pass

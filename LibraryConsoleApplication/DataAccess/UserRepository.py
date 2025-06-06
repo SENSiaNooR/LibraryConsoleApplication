@@ -9,7 +9,7 @@ class UserRepository(BaseRepository):
     
     @classmethod
     @map_to_single_model(UserModel)
-    def create_user(cls, username : str, hashed_password : str, cursor : Optional[PgCursor] = None) -> UserModel:
+    def add_user(cls, username : str, hashed_password : str, cursor : Optional[PgCursor] = None) -> UserModel:
         
         commit_and_close = False
         if cursor is None:

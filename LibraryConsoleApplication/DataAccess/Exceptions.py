@@ -1,0 +1,17 @@
+
+
+class NotSuchModelInDataBaseError(Exception):
+    """Exception raised for custom error in the application."""
+
+    def __init__(self, message, model):
+        super().__init__(message)
+        self.model = model
+
+
+class MultipleRowsReturnedError(Exception):
+    """Raised when more than one row is returned in a single-row query."""
+    pass
+
+class MemberAlreadyDeactivatedError(Exception):
+    """Raised when trying to deactivate a member who is already inactive."""
+    pass

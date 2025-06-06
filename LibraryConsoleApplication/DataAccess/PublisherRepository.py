@@ -2,6 +2,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
+from DataAccess.Exceptions import MultipleRowsReturnedError
 from DataAccess.Models import CategoryModel, CategoryViewModel, MemberModel, MemberWithoutPasswordViewModel, PublisherModel, PublisherViewModel, UserModel, UserType
 from DataAccess.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
@@ -26,11 +27,14 @@ class PublisherRepository(BaseRepository):
             f"""
             SELECT * FROM {DBTables.PUBLISHER} 
             WHERE {where_clause}
-            LIMIT 1
             """
         )
         
         cursor.execute(query, values)
+        
+        if cursor.rowcount > 1:
+            raise MultipleRowsReturnedError()
+        
         result = cursor.fetchone()
         
         if commit_and_close:
@@ -41,7 +45,7 @@ class PublisherRepository(BaseRepository):
     
     @classmethod
     @map_to_single_model(PublisherViewModel)
-    def get_publisher_with_books(cls, model : PublisherModel, cursor : Optional[PgCursor] = None) -> PublisherViewModel:
+    def get_publisher_view(cls, model : PublisherViewModel, cursor : Optional[PgCursor] = None) -> PublisherViewModel:
         
         commit_and_close = False
         if cursor is None:
@@ -54,11 +58,14 @@ class PublisherRepository(BaseRepository):
             f"""
             SELECT * FROM {DBViews.PUBLISHER_VIEW} 
             WHERE {where_clause}
-            LIMIT 1
             """
         )
         
         cursor.execute(query, values)
+        
+        if cursor.rowcount > 1:
+            raise MultipleRowsReturnedError()
+        
         result = cursor.fetchone()
         
         if commit_and_close:
@@ -69,20 +76,32 @@ class PublisherRepository(BaseRepository):
        
     @classmethod
     @map_to_model(PublisherModel)
-    def get_all_publishers(cls, cursor : Optional[PgCursor] = None) -> list[PublisherModel]:
+    def get_publishers(cls, model : PublisherModel, cursor : Optional[PgCursor] = None) -> list[PublisherModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        query = (
-            f"""
-            SELECT * FROM {DBTables.PUBLISHER} 
-            """
-        )
+        where_clause, values = build_where_clause(model, use_like_for_strings=True)
         
-        cursor.execute(query)
+        if not where_clause:
+            query = (
+                f"""
+                SELECT * FROM {DBTables.PUBLISHER} 
+                """
+            )
+            cursor.execute(query)
+            
+        else:
+            query = (
+                f"""
+                SELECT * FROM {DBTables.PUBLISHER}
+                WHERE {where_clause}
+                """
+            )
+            cursor.execute(query, values)
+            
         result = cursor.fetchall()
         
         if commit_and_close:
@@ -93,20 +112,32 @@ class PublisherRepository(BaseRepository):
     
     @classmethod
     @map_to_model(PublisherViewModel)
-    def get_all_publishers_with_books(cls, cursor : Optional[PgCursor] = None) -> list[PublisherViewModel]:
+    def get_publishers_view(cls, model : PublisherViewModel, cursor : Optional[PgCursor] = None) -> list[PublisherViewModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        query = (
-            f"""
-            SELECT * FROM {DBViews.PUBLISHER_VIEW} 
-            """
-        )
+        where_clause, values = build_where_clause(model, use_like_for_strings=True)
         
-        cursor.execute(query)
+        if not where_clause:
+            query = (
+                f"""
+                SELECT * FROM {DBViews.PUBLISHER_VIEW} 
+                """
+            )
+            cursor.execute(query)
+            
+        else:
+            query = (
+                f"""
+                SELECT * FROM {DBViews.PUBLISHER_VIEW}
+                WHERE {where_clause}
+                """
+            )
+            cursor.execute(query, values)
+            
         result = cursor.fetchall()
         
         if commit_and_close:
