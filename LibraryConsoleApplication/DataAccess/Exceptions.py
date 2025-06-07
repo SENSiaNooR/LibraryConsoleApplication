@@ -15,3 +15,7 @@ class MultipleRowsReturnedError(Exception):
 class MemberAlreadyDeactivatedError(Exception):
     """Raised when trying to deactivate a member who is already inactive."""
     pass
+
+class AuthenticationFailed(Exception):
+    def __init__(self, message="Authentication failed"):
+        super().__init__(message)

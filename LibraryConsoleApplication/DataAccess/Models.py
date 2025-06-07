@@ -3,6 +3,8 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID
 from typing import Optional, Union
+from psycopg2.extensions import register_adapter, AsIs
+
 
 # Unset type
 
@@ -36,6 +38,13 @@ class UserType(Enum):
     admin = 'admin'
     librarian = 'librarian'
     member = 'member'
+    
+def adapt_enum(enum_val):
+    return AsIs(f"'{enum_val.value}'")
+
+register_adapter(BorrowRequestStatus, adapt_enum)
+register_adapter(LibrarianAction, adapt_enum)
+register_adapter(UserType, adapt_enum)
 
 # SQL Table Models
 

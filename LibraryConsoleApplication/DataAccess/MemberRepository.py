@@ -22,12 +22,8 @@ class MemberRepository(BaseRepository):
 
         query = (
             f"""
-            SELECT 
-                *
-            FROM
-                {DBViews.MEMBER_WITHOUT_PASSWORD_VIEW} 
-            WHERE
-                {DBViewColumns.MemberWithoutPasswordView.USERNAME} = %s
+            SELECT * FROM {DBViews.MEMBER_WITHOUT_PASSWORD_VIEW} 
+            WHERE {DBViewColumns.MemberWithoutPasswordView.USERNAME} = %s
             """
         )
         
@@ -137,7 +133,7 @@ class MemberRepository(BaseRepository):
             
     @classmethod
     @map_to_single_model(MemberModel)
-    def create_member(cls, username : str, hashed_password : str, name : str, email : str, cursor : Optional[PgCursor] = None) -> MemberModel:
+    def add_member(cls, username : str, hashed_password : str, name : str, email : str, cursor : Optional[PgCursor] = None) -> MemberModel:
         
         commit_and_close = False
         if cursor is None:

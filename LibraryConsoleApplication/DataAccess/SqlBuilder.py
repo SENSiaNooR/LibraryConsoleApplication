@@ -36,7 +36,8 @@ def build_set_clause(model: Any, exclude: set = {"id"}) -> Tuple[str, list]:
 
 def build_where_clause(
     model: Any,
-    use_like_for_strings: bool = False
+    use_like_for_strings: bool = False,
+    exclude: set = set()
 ) -> Tuple[str, list]:
     """
     Builds a SQL WHERE clause based on non-Unset fields of the given model.
@@ -54,7 +55,7 @@ def build_where_clause(
     values = []
 
     for field, value in fields.items():
-        if isinstance(value, UnsetType):
+        if field in exclude or isinstance(value, UnsetType):
             continue
         
         if value is None:
