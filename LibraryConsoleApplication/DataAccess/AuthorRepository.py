@@ -1,7 +1,6 @@
 from typing import Optional
-from DataAccess.Exceptions import MultipleRowsReturnedError
-from DataAccess.Schema import DBTableColumns, DBTables, DBViews
-from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause
+from DataAccess.CommonQueriesRepository import CommonQueriesRepository
+from DataAccess.Schema import DBTables, DBViews
 from Models import AuthorModel, AuthorViewModel
 from BaseRepository import BaseRepository, map_to_single_model
 from BaseRepository import map_to_model
@@ -11,220 +10,67 @@ class AuthorRepository(BaseRepository):
 
     @classmethod
     @map_to_single_model(AuthorModel)
-    def get_author(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> AuthorModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model)
-
-        query = (
-            f"""
-            SELECT * FROM {DBTables.AUTHOR} 
-            WHERE {where_clause}
-            """
+    def get_category(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> AuthorModel:
+        return CommonQueriesRepository.get_record(
+            model=model,
+            table=DBTables.AUTHOR,
+            cursor=cursor
         )
         
-        cursor.execute(query, values)
-        
-        if cursor.rowcount > 1:
-            raise MultipleRowsReturnedError()
-        
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
-    
     @classmethod
     @map_to_single_model(AuthorViewModel)
-    def get_author_with_books(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> AuthorViewModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model)
-
-        query = (
-            f"""
-            SELECT * FROM {DBViews.AUTHOR_VIEW} 
-            WHERE {where_clause}
-            """
+    def get_category_view(cls, model : AuthorViewModel, cursor : Optional[PgCursor] = None) -> AuthorViewModel:
+        return CommonQueriesRepository.get_record(
+            model=model,
+            table=DBViews.AUTHOR_VIEW,
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        
-        if cursor.rowcount > 1:
-            raise MultipleRowsReturnedError()
-        
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
        
     @classmethod
     @map_to_model(AuthorModel)
-    def get_authors(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> list[AuthorModel]:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model, use_like_for_strings=True)
-        
-        if not where_clause:
-            query = (
-                f"""
-                SELECT * FROM {DBTables.AUTHOR} 
-                """
-            )
-            cursor.execute(query)
-            
-        else:
-            query = (
-                f"""
-                SELECT * FROM {DBTables.AUTHOR}
-                WHERE {where_clause}
-                """
-            )
-            cursor.execute(query, values)
-            
-        result = cursor.fetchall()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
+    def get_categories(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> list[AuthorModel]:
+        return CommonQueriesRepository.get_records(
+            model=model,
+            table=DBTables.AUTHOR,
+            cursor=cursor
+        )
     
     @classmethod
     @map_to_model(AuthorViewModel)
-    def get_authors_with_books(cls, model : AuthorViewModel, cursor : Optional[PgCursor] = None) -> list[AuthorViewModel]:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model, use_like_for_strings=True)
-        
-        if not where_clause:
-            query = (
-                f"""
-                SELECT * FROM {DBViews.AUTHOR_VIEW} 
-                """
-            )
-            cursor.execute(query)
-            
-        else:
-            query = (
-                f"""
-                SELECT * FROM {DBViews.AUTHOR_VIEW}
-                WHERE {where_clause}
-                """
-            )
-            cursor.execute(query, values)
-            
-        result = cursor.fetchall()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
+    def get_categories_view(cls, model : AuthorViewModel, cursor : Optional[PgCursor] = None) -> list[AuthorViewModel]:
+        return CommonQueriesRepository.get_records(
+            model=model,
+            table=DBViews.AUTHOR_VIEW,
+            cursor=cursor
+        )
 
     @classmethod
     @map_to_single_model(AuthorModel)
-    def add_author(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> AuthorModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        columns_clause, placeholders_clause, values = build_insert_clause(model)
-
-        query = (
-            f"""
-            INSERT INTO {DBTables.AUTHOR} (
-                {columns_clause}
-            )
-            VALUES ({placeholders_clause})
-            RETURNING *
-            """
+    def add_category(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> AuthorModel:
+        return CommonQueriesRepository.add_record(
+            model=model,
+            table=DBTables.AUTHOR,
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
     
     @classmethod
-    def update_author(cls, model: AuthorModel, cursor: Optional[PgCursor] = None) -> None:
-        if model.id is None:
-            raise ValueError("Model must have an 'id' to perform update.")
-    
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
+    def update_category(cls, model: AuthorModel, cursor: Optional[PgCursor] = None) -> None:
+        return CommonQueriesRepository.update_record(
+            model=model,
+            table=DBTables.AUTHOR,
+            cursor=cursor
+        )
 
-        set_clause, values = build_set_clause(model)
-
-        if not set_clause:
-            return  # Nothing to update
-
-        query = f"""
-            UPDATE {DBTables.AUTHOR}
-            SET {set_clause}
-            WHERE {DBTableColumns.Author.ID} = %s
-        """
-    
-        values.append(model.id)
-        cursor.execute(query, values)
-
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
     @classmethod
-    def delete_author(cls, id: int, cursor: Optional[PgCursor] = None) -> None:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        query = f"""
-            DELETE FROM {DBTables.AUTHOR}
-            WHERE {DBTableColumns.Author.ID} = %s
-        """
-    
-        cursor.execute(query, (id,))
-
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
+    def delete_category(cls, id: int, cursor: Optional[PgCursor] = None) -> None:
+        return CommonQueriesRepository.delete_record(
+            id=id,
+            table=DBTables.AUTHOR,
+            cursor=cursor
+        )
     
 
 
 if __name__ == '__main__':
 
-    #a = AuthorRepository.get_all_authors()
-    #for item in a:
-    #    print(item)
     pass

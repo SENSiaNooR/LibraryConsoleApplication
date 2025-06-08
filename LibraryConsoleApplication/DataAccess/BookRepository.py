@@ -1,7 +1,9 @@
 ﻿
+from msilib.text import tables
 from typing import Any, Optional, Union
 from DataAccess.CategoryRepository import CategoryRepository
 from DataAccess.AuthorRepository import AuthorRepository
+from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from DataAccess.Exceptions import MultipleRowsReturnedError, NotSuchModelInDataBaseError
 from DataAccess.PublisherRepository import PublisherRepository
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
@@ -83,20 +85,11 @@ class BookRepository(BaseRepository):
             
             c_models.append(c_model)
          
-        columns_clause, placeholders_clause, values = build_insert_clause(book_model)
-            
-        query = (
-            f"""
-            INSERT INTO {DBTables.BOOK} (
-                {columns_clause}
-            ) 
-            VALUES({placeholders_clause})
-            RETURNING *
-            """
+        book_result = CommonQueriesRepository.add_record(
+            model=book_model,
+            table=DBTables.BOOK,
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        book_result = cursor.fetchone()
         
         b_model = BookModel(*book_result)
         
@@ -115,144 +108,38 @@ class BookRepository(BaseRepository):
     @classmethod
     @map_to_single_model(BookModel)
     def get_book(cls, model : BookModel, cursor : Optional[PgCursor] = None) -> BookModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model)
-        
-        if not where_clause:
-            raise ValueError("At least one non-null attribute must be provided for filtering.")
-
-        query = (
-            f"""
-            SELECT * FROM {DBTables.BOOK} 
-            WHERE {where_clause}
-            """
+        return CommonQueriesRepository.get_record(
+            model=model,
+            table=DBTables.BOOK,
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        
-        if cursor.rowcount > 1:
-            raise MultipleRowsReturnedError()
-        
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
     
     @classmethod
     @map_to_single_model(BookViewModel)
     def get_book_view(cls, model : BookViewModel, cursor : Optional[PgCursor] = None) -> BookViewModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model)
-        
-        if not where_clause:
-            raise ValueError("At least one non-null attribute must be provided for filtering.")
-
-        query = (
-            f"""
-            SELECT * FROM {DBViews.BOOK_VIEW} 
-            WHERE {where_clause}
-            """
+        return CommonQueriesRepository.get_record(
+            model=model,
+            table=DBViews.BOOK_VIEW,
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        
-        if cursor.rowcount > 1:
-            raise MultipleRowsReturnedError()
-        
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
     
     @classmethod
     @map_to_model(BookModel)
     def get_books(cls, model : BookModel, cursor : Optional[PgCursor] = None) -> list[BookModel]:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model, use_like_for_strings=True)
-        
-        query : str
-
-        if not where_clause:
-            query = (
-                f"""
-                SELECT * FROM {DBTables.BOOK} 
-                """
-            )
-            cursor.execute(query)
-        else:
-            query = (
-                f"""
-                SELECT * FROM {DBTables.BOOK} 
-                WHERE {where_clause}
-                """
-            )
-            cursor.execute(query, values)
-
-        result = cursor.fetchall()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
+        return CommonQueriesRepository.get_records(
+            model=model,
+            table=DBTables.BOOK,
+            cursor=cursor
+        )
     
     @classmethod
     @map_to_model(BookViewModel)
     def get_books_view(cls, model : BookViewModel, cursor : Optional[PgCursor] = None) -> list[BookViewModel]:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model, use_like_for_strings=True)
-        
-        query : str
-
-        if not where_clause:
-            query = (
-                f"""
-                SELECT * FROM {DBViews.BOOK_VIEW} 
-                """
-            )
-            cursor.execute(query)
-        else:
-            query = (
-                f"""
-                SELECT * FROM {DBViews.BOOK_VIEW} 
-                WHERE {where_clause}
-                """
-            )
-            cursor.execute(query, values)
-        
-        result = cursor.fetchall()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
+        return CommonQueriesRepository.get_records(
+            model=model,
+            table=DBViews.BOOK_VIEW,
+            cursor=cursor
+        )
 
     @classmethod
     @map_to_single_model(BookAuthorModel)
@@ -271,20 +158,18 @@ class BookRepository(BaseRepository):
         
         if a_model is None:
             raise NotSuchModelInDataBaseError('author not found', author_model)
-                   
-        query = (
-            f"""
-            INSERT INTO {DBTables.BOOK_AUTHOR} (
-                {DBTableColumns.BookAuthor.BOOK_ID},
-                {DBTableColumns.BookAuthor.AUTHOR_ID}
-            ) 
-            VALUES(%s, %s)
-            RETURNING *
-            """
+        
+        model = BookAuthorModel(
+            book_id = b_model.id,
+            author_id = a_model.id
         )
         
-        cursor.execute(query, (b_model.id, a_model.id))
-        result = cursor.fetchone()
+        result = CommonQueriesRepository.add_record(
+            model=model,
+            table=DBTables.BOOK_AUTHOR,
+            exclude=set(),
+            cursor=cursor
+        )
 
         if commit_and_close:
             cursor.connection.commit()
@@ -310,19 +195,17 @@ class BookRepository(BaseRepository):
         if c_model is None:
             raise NotSuchModelInDataBaseError('category not found', category_model)
                    
-        query = (
-            f"""
-            INSERT INTO {DBTables.BOOK_CATEGORY} (
-                {DBTableColumns.BookCategory.BOOK_ID},
-                {DBTableColumns.BookCategory.CATEGORY_ID}
-            ) 
-            VALUES(%s, %s)
-            RETURNING *
-            """
+        model = BookCategoryModel(
+            book_id = b_model.id,
+            category_id = c_model.id
         )
         
-        cursor.execute(query, (b_model.id, c_model.id))
-        result = cursor.fetchone()
+        result = CommonQueriesRepository.add_record(
+            model=model,
+            table=DBTables.BOOK_CATEGORY,
+            exclude=set(),
+            cursor=cursor
+        )
 
         if commit_and_close:
             cursor.connection.commit()
@@ -332,45 +215,21 @@ class BookRepository(BaseRepository):
     
     @classmethod
     def _delete_book_categories(cls, book_id: int, cursor : Optional[PgCursor] = None) -> None:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-                    
-        query = (
-            f"""
-            DELETE FROM {DBTables.BOOK_CATEGORY} 
-            WHERE {DBTableColumns.BookCategory.BOOK_ID} = %s
-            """
+        model = BookCategoryModel(book_id=book_id)
+        return CommonQueriesRepository.delete_records(
+            model=model,
+            table=DBTables.BOOK_CATEGORY,
+            cursor=cursor
         )
-        
-        cursor.execute(query, (book_id,))
-
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
 
     @classmethod
     def _delete_book_authors(cls, book_id: int, cursor : Optional[PgCursor] = None) -> None:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-                   
-        query = (
-            f"""
-            DELETE FROM {DBTables.BOOK_AUTHOR} 
-            WHERE {DBTableColumns.BookAuthor.BOOK_ID} = %s
-            """
+        model = BookAuthorModel(book_id=book_id)
+        return CommonQueriesRepository.delete_records(
+            model=model,
+            table=DBTables.BOOK_AUTHOR,
+            cursor=cursor
         )
-        
-        cursor.execute(query, (book_id,))
-
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
 
     @classmethod
     def _replace_authors(cls, book_id: int, authors : list[AuthorModel], auto_create : bool = False, cursor : Optional[PgCursor] = None) -> None:
@@ -459,16 +318,11 @@ class BookRepository(BaseRepository):
         if p_model is not None:
             book_model.publisher_id = p_model.id
         
-        set_clause, values = build_set_clause(book_model)
-
-        query = f"""
-            UPDATE {DBTables.BOOK}
-            SET {set_clause}
-            WHERE {DBTableColumns.Publisher.ID} = %s
-        """
-        values.append(book_model.id)
-        
-        cursor.execute(query, values)
+        CommonQueriesRepository.update_record(
+            model=book_model,
+            table=DBTables.BOOK,
+            cursor=cursor
+        )
         
         if authors_model:
             cls._replace_authors(book_model.id, authors_model, auto_create_relation, cursor)
@@ -483,21 +337,11 @@ class BookRepository(BaseRepository):
        
     @classmethod
     def delete_book(cls, id: int, cursor: Optional[PgCursor] = None) -> None:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-        
-        query = f"""
-            DELETE FROM {DBTables.BOOK}
-            WHERE {DBTableColumns.Book.ID} = %s
-        """
-        cursor.execute(query, (id,))
-
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
+        return CommonQueriesRepository.delete_record(
+            id=id,
+            table=DBTables.BOOK,
+            cursor=cursor
+        )
 
 
 if __name__ == '__main__':

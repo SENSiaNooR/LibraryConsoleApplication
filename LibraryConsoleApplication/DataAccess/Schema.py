@@ -37,7 +37,7 @@ class DBViews:
 
 class DBTableColumns:
     class Admin:
-        USER_ID = "user_id"
+        ID = "id"
     
     class Author:
         ID = "id"
@@ -88,7 +88,7 @@ class DBTableColumns:
         REQUEST_COUNT = "request_count"
     
     class Librarian:
-        USER_ID = "user_id"
+        ID = "id"
         NAME = "name"
     
     class LibrarianActivityLog:
@@ -100,7 +100,7 @@ class DBTableColumns:
         TIMESTAMP = "timestamp"
 
     class Member:
-        USER_ID = "user_id"
+        ID = "id"
         NAME = "name"
         EMAIL = "email"
         JOIN_DATE = "join_date"

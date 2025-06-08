@@ -1,7 +1,8 @@
 from typing import Optional
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
+from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from DataAccess.Exceptions import AuthenticationFailed, MultipleRowsReturnedError, NotSuchModelInDataBaseError
-from DataAccess.Models import MemberModel, UserModel, UserType, UserViewModel
+from DataAccess.Models import MemberModel, PlainUserModel, UserModel, UserType, UserViewModel
 from DataAccess.Schema import DBTableColumns, DBTables, DBTypes, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
@@ -12,8 +13,11 @@ from PasswordManagement import PasswordManager
 class UserRepository(BaseRepository):
     
     @classmethod
-    def verify_user(cls, username : str, password : str, cursor : Optional[PgCursor] = None) -> bool:
+    def verify_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> bool:
         
+        if (not isinstance(plain_user_model.username, str)) or (not isinstance(plain_user_model.password, str)):
+            raise ValueError('username and password must be string')
+
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -26,7 +30,7 @@ class UserRepository(BaseRepository):
             """
         )
         
-        cursor.execute(query, (username,))
+        cursor.execute(query, (plain_user_model.username,))
         
         if cursor.rowcount == 0:
             return False
@@ -37,7 +41,7 @@ class UserRepository(BaseRepository):
         password_manager = PasswordManager()
         
         verification = password_manager.verify_password(
-            plain_password=password,
+            plain_password=plain_user_model.password,
             hashed_password=user_model.hashed_password
         )
         
@@ -50,158 +54,52 @@ class UserRepository(BaseRepository):
     @classmethod
     @map_to_single_model(UserModel)
     def get_user(cls, model : UserModel, cursor : Optional[PgCursor] = None) -> UserModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(model, exclude={DBTableColumns.User.HASHED_PASSWORD})
-        
-        if not where_clause:
-            raise ValueError("At least one non-null attribute must be provided for filtering.")
-
-        query = (
-            f"""
-            SELECT * FROM {DBTables.USER} 
-            WHERE {where_clause}
-            """
+        return CommonQueriesRepository.get_record(
+            model=model,
+            table=DBTables.USER,
+            exclude={DBTableColumns.User.HASHED_PASSWORD},
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        
-        if cursor.rowcount > 1:
-            raise MultipleRowsReturnedError()
-        
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
         
     @classmethod
     @map_to_single_model(UserViewModel)
     def get_user_view(cls, model : UserViewModel, cursor : Optional[PgCursor] = None) -> UserViewModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-            
-        where_clause, values = build_where_clause(model, exclude={DBViewColumns.UserView.HASHED_PASSWORD})
-        
-        if not where_clause:
-            raise ValueError("At least one non-null attribute must be provided for filtering.")
-
-        query = (
-            f"""
-            SELECT * FROM {DBViews.USER_VIEW} 
-            WHERE {where_clause}
-            """
+        return CommonQueriesRepository.get_record(
+            model=model,
+            table=DBViews.USER_VIEW,
+            exclude={DBViewColumns.UserView.HASHED_PASSWORD},
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        
-        if cursor.rowcount > 1:
-            raise MultipleRowsReturnedError()
-        
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
        
     @classmethod
     @map_to_model(UserModel)
     def get_users(cls, model : UserModel, cursor : Optional[PgCursor] = None) -> list[UserModel]:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(
-            model=model, 
-            use_like_for_strings=True, 
-            exclude={DBTableColumns.User.HASHED_PASSWORD}
+        return CommonQueriesRepository.get_records(
+            model=model,
+            table=DBTables.USER,
+            exclude={DBTableColumns.User.HASHED_PASSWORD},
+            cursor=cursor
         )
-        
-        if not where_clause:
-            query = (
-                f"""
-                SELECT * FROM {DBTables.USER} 
-                """
-            )
-            cursor.execute(query)
-            
-        else:
-            query = (
-                f"""
-                SELECT * FROM {DBTables.USER}
-                WHERE {where_clause}
-                """
-            )
-            cursor.execute(query, values)
-            
-        result = cursor.fetchall()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
     
     @classmethod
     @map_to_model(UserViewModel)
     def get_users_view(cls, model : UserViewModel, cursor : Optional[PgCursor] = None) -> list[UserViewModel]:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        where_clause, values = build_where_clause(
-            model=model, 
-            use_like_for_strings=True,
-            exclude={DBViewColumns.UserView.HASHED_PASSWORD}
+        return CommonQueriesRepository.get_records(
+            model=model,
+            table=DBViews.USER_VIEW,
+            exclude={DBViewColumns.UserView.HASHED_PASSWORD},
+            cursor=cursor
         )
-        
-        if not where_clause:
-            query = (
-                f"""
-                SELECT * FROM {DBViews.USER_VIEW} 
-                """
-            )
-            cursor.execute(query)
-            
-        else:
-            query = (
-                f"""
-                SELECT * FROM {DBViews.USER_VIEW}
-                WHERE {where_clause}
-                """
-            )
-            cursor.execute(query, values)
-            
-        result = cursor.fetchall()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
 
     @classmethod
-    def hash_password_and_add_user(cls, username : str, password : str, cursor : Optional[PgCursor] = None) -> UserModel:
+    def hash_password_and_add_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> UserModel:
+        if (not isinstance(plain_user_model.username, str)) or (not isinstance(plain_user_model.password, str)):
+            raise ValueError('username and password must be string')
         
         password_manager = PasswordManager()
-        hashed_password = password_manager.hash_password(plain_password=password)
+        hashed_password = password_manager.hash_password(plain_password=plain_user_model.password)
         model = UserModel(
-            username=username,
+            username=plain_user_model.username,
             hashed_password=hashed_password
         )
         return cls.add_user(model,cursor)
@@ -209,42 +107,21 @@ class UserRepository(BaseRepository):
     @classmethod
     @map_to_single_model(UserModel)
     def add_user(cls, model : UserModel, cursor : Optional[PgCursor] = None) -> UserModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-        
-        columns_clause, placeholders_clause, values = build_insert_clause(model)
-
-        query = (
-            f"""
-            INSERT INTO {DBTables.USER} (
-                {columns_clause}
-            )
-            VALUES ({placeholders_clause})
-            RETURNING *
-            """
+        return CommonQueriesRepository.add_record(
+            model=model,
+            table=DBTables.USER,
+            cursor=cursor
         )
-        
-        cursor.execute(query, values)
-        result = cursor.fetchone()
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
     
     @classmethod
-    def change_password(cls, username : str, password : str, new_password : str, cursor : Optional[PgCursor] = None) -> None:
+    def change_password(cls, plain_user_model : PlainUserModel, new_password : str, cursor : Optional[PgCursor] = None) -> None:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        verification = cls.verify_user(username, password, cursor)
+        verification = cls.verify_user(plain_user_model, cursor)
         
         if not verification:
             raise AuthenticationFailed('Username or password is wrong')
@@ -260,7 +137,7 @@ class UserRepository(BaseRepository):
             """
         )
         
-        cursor.execute(query, (new_hashed_password, username))
+        cursor.execute(query, (new_hashed_password, plain_user_model.username))
         
         if commit_and_close:
             cursor.connection.commit()
@@ -302,14 +179,14 @@ class UserRepository(BaseRepository):
         cls._change_password_by_role(username, new_password, UserType.librarian, cursor)
     
     @classmethod
-    def change_username(cls, username : str, password : str, new_username : str, cursor : Optional[PgCursor] = None) -> None:
+    def change_username(cls, plain_user_model : PlainUserModel, new_username : str, cursor : Optional[PgCursor] = None) -> None:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        verification = cls.verify_user(username, password, cursor)
+        verification = cls.verify_user(plain_user_model, cursor)
         
         if not verification:
             raise AuthenticationFailed('Username or password is wrong')
@@ -322,7 +199,7 @@ class UserRepository(BaseRepository):
             """
         )
         
-        cursor.execute(query, (new_username, username))
+        cursor.execute(query, (new_username, plain_user_model.username))
         
         if commit_and_close:
             cursor.connection.commit()
@@ -373,10 +250,10 @@ if __name__ == '__main__':
     
     ##############################################################################################################################
     
-    res4 = UserRepository.verify_user('sensian', '82sen82abc')
+    res4 = UserRepository.verify_user(PlainUserModel('sensian', '82sen82abc'))
     print(f'res4 = {res4}\n\n')
     
-    res5 = UserRepository.verify_user('sensian', '82SEN82ABC')
+    res5 = UserRepository.verify_user(PlainUserModel('sensian', '82SEN82ABC'))
     print(f'res5 = {res5}\n\n')
 
     ##############################################################################################################################
@@ -407,11 +284,11 @@ if __name__ == '__main__':
     res6 = UserRepository.add_user(model4)
     print(f'res6 = {res6}\n\n')
     
-    res7 = UserRepository.hash_password_and_add_user(username='hajhaj4343', password='12121212')
+    res7 = UserRepository.hash_password_and_add_user(PlainUserModel(username='hajhaj4343', password='12121212'))
     print(f'res7 = {res7}\n\n')
     
-    res8 = UserRepository.verify_user('hajhaj4343', password='12121211')
-    res9 = UserRepository.verify_user('hajhaj4343', password='12121212')
+    res8 = UserRepository.verify_user(PlainUserModel('hajhaj4343', password='12121211'))
+    res9 = UserRepository.verify_user(PlainUserModel('hajhaj4343', password='12121212'))
     
     print(f'res8 = {res8}\n\n')
     print(f'res9 = {res9}\n\n')
@@ -419,13 +296,13 @@ if __name__ == '__main__':
     ##############################################################################################################################
 
     try:
-        UserRepository.change_password('hajhaj4343', '12121211', '87654321')
+        UserRepository.change_password(PlainUserModel('hajhaj4343', '12121211'), '87654321')
     except Exception as ex:
         print(f'{ex}\n\n')
      
-    UserRepository.change_password('hajhaj4343', '12121212', '87654321')
+    UserRepository.change_password(PlainUserModel('hajhaj4343', '12121212'), '87654321')
     
-    res10 = UserRepository.verify_user('hajhaj4343', password='87654321')
+    res10 = UserRepository.verify_user(PlainUserModel('hajhaj4343', password='87654321'))
     print(f'res10 = {res10}\n\n')
     
     ##############################################################################################################################
@@ -437,7 +314,7 @@ if __name__ == '__main__':
         
     ##############################################################################################################################
     
-    UserRepository.change_username('hajhaj4343', '87654321', 'hajhaj5454')
+    UserRepository.change_username(PlainUserModel('hajhaj4343', '87654321'), 'hajhaj5454')
     res11 = UserRepository.get_user_view(UserViewModel(username='hajhaj5454'))
     
     print(f'res11 = {res11}\n\n')

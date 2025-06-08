@@ -50,7 +50,7 @@ register_adapter(UserType, adapt_enum)
 
 @dataclass
 class AdminModel:
-    user_id: Union[int, None, UnsetType] = UNSET
+    id: Union[int, None, UnsetType] = UNSET
 
 @dataclass
 class AuthorModel:
@@ -110,7 +110,7 @@ class GuestModel:
 
 @dataclass
 class LibrarianModel:
-    user_id: Union[int, None, UnsetType] = UNSET
+    id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
 
 @dataclass
@@ -124,7 +124,7 @@ class LibrarianActivityLogModel:
 
 @dataclass
 class MemberModel:
-    user_id: Union[int, None, UnsetType] = UNSET
+    id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     email: Union[str, None, UnsetType] = UNSET
     join_date: Union[datetime, None, UnsetType] = UNSET
@@ -262,3 +262,10 @@ class UserWithoutPasswordViewModel:
     username: Union[str, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     user_type: Union[UserType, None, UnsetType] = UNSET
+    
+# Other Models
+
+@dataclass
+class PlainUserModel:
+    username: Union[str, None, UnsetType] = UNSET
+    password: Union[str, None, UnsetType] = UNSET
