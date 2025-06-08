@@ -351,6 +351,7 @@ if __name__ == '__main__':
     
     UserRepository.delete_user('hajhaj3232')
     UserRepository.delete_user('hajhaj4343')
+    UserRepository.delete_user('hajhaj5454')
 
     ##############################################################################################################################
 

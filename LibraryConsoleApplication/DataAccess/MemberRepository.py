@@ -6,6 +6,7 @@ from DataAccess.Exceptions import MemberAlreadyDeactivatedError
 from DataAccess.Models import MemberModel, MemberWithoutPasswordViewModel, UserModel, UserType
 from DataAccess.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
+from DataAccess.SqlBuilder import build_where_clause
 from DataAccess.UserRepository import UserRepository
 
 
@@ -13,13 +14,15 @@ class MemberRepository(BaseRepository):
     
     @classmethod
     @map_to_single_model(MemberWithoutPasswordViewModel)
-    def get_member_without_password(cls, username : str, cursor : Optional[PgCursor] = None) -> MemberWithoutPasswordViewModel:
+    def get_member_without_password(cls, model : MemberWithoutPasswordViewModel, cursor : Optional[PgCursor] = None) -> MemberWithoutPasswordViewModel:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
+        where_clause, values = build_where_clause(model)
+        
         query = (
             f"""
             SELECT * FROM {DBViews.MEMBER_WITHOUT_PASSWORD_VIEW} 
