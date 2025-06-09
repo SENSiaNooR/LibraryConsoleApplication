@@ -1,14 +1,13 @@
 
 from datetime import datetime
-from mailbox import Message
 from typing import Optional
 from zoneinfo import ZoneInfo
-from DataAccess.Exceptions import NotSuchModelInDataBaseError
+from Exceptions.Exceptions import NotSuchModelInDataBaseError
 from DataAccess.UserRepository import UserRepository
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
-from DataAccess.Models import CategoryModel, CategoryViewModel, MessageModel, MessageViewModel, UserModel
-from DataAccess.Schema import DBTableColumns, DBTables, DBViews
+from Models.Models import MessageModel, MessageViewModel, UserModel
+from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
 

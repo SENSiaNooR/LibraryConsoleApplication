@@ -1,8 +1,8 @@
 ﻿from typing import Optional
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
-from DataAccess.Models import CategoryModel, CategoryViewModel
-from DataAccess.Schema import DBTables, DBViews
+from Models.Models import CategoryModel, CategoryViewModel
+from Models.Schema import DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
 

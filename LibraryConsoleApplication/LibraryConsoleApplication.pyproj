@@ -30,21 +30,28 @@
     <Compile Include="DataAccess\CategoryRepository.py" />
     <Compile Include="DataAccess\CommonQueriesRepository.py" />
     <Compile Include="DataAccess\Connection.py" />
-    <Compile Include="DataAccess\Exceptions.py" />
+    <Compile Include="Exceptions\Exceptions.py" />
     <Compile Include="DataAccess\GuestRepository.py" />
     <Compile Include="DataAccess\LibrarianActivityLogRepository.py" />
     <Compile Include="DataAccess\LibrarianRepository.py" />
     <Compile Include="DataAccess\MemberRepository.py" />
     <Compile Include="DataAccess\MessageRepository.py" />
-    <Compile Include="DataAccess\Models.py" />
+    <Compile Include="Exceptions\__init__.py" />
+    <Compile Include="Models\Models.py" />
     <Compile Include="DataAccess\PublisherRepository.py" />
-    <Compile Include="DataAccess\schema.py" />
+    <Compile Include="Models\Schema.py" />
     <Compile Include="DataAccess\SqlBuilder.py" />
     <Compile Include="DataAccess\UserRepository.py" />
     <Compile Include="DataAccess\__init__.py" />
     <Compile Include="JWT.py" />
     <Compile Include="LibraryConsoleApplication.py" />
+    <Compile Include="Models\__init__.py" />
     <Compile Include="PasswordManagement.py" />
+    <Compile Include="Services\AdminServices.py" />
+    <Compile Include="Services\BaseServices.py" />
+    <Compile Include="Services\LibrarianServices.py" />
+    <Compile Include="Services\MemberServices.py" />
+    <Compile Include="Services\__init__.py" />
     <Compile Include="Validations.py" />
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +72,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataAccess\" />
+    <Folder Include="Models\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

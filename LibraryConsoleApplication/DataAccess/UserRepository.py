@@ -1,12 +1,10 @@
 from typing import Optional
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from DataAccess.Exceptions import AuthenticationFailed, MultipleRowsReturnedError, NotSuchModelInDataBaseError
-from DataAccess.Models import MemberModel, PlainUserModel, UserModel, UserType, UserViewModel
-from DataAccess.Schema import DBTableColumns, DBTables, DBTypes, DBViewColumns, DBViews
+from Exceptions.Exceptions import AuthenticationFailed, NotSuchModelInDataBaseError
+from Models.Models import PlainUserModel, UserModel, UserType, UserViewModel
+from Models.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
-
-from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause
 from PasswordManagement import PasswordManager
 
 

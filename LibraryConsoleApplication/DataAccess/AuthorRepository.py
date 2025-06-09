@@ -1,7 +1,7 @@
 from typing import Optional
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from DataAccess.Schema import DBTables, DBViews
-from Models import AuthorModel, AuthorViewModel
+from Models.Schema import DBTables, DBViews
+from Models.Models import AuthorModel, AuthorViewModel
 from BaseRepository import BaseRepository, map_to_single_model
 from BaseRepository import map_to_model
 from psycopg2.extensions import cursor as PgCursor

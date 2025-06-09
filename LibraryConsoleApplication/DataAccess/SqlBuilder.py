@@ -1,6 +1,6 @@
 from dataclasses import asdict
 from typing import Tuple, Any
-from DataAccess.Models import UnsetType
+from Models.Models import UnsetType
 
 def build_set_clause(model: Any, exclude: set = {"id"}) -> Tuple[str, list]:
     """

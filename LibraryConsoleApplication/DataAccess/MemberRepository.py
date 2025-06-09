@@ -3,9 +3,9 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from DataAccess.Exceptions import MemberAlreadyActivatedError, MemberAlreadyDeactivatedError
-from DataAccess.Models import MemberModel, MemberWithoutPasswordViewModel, PlainUserModel, UnsetType
-from DataAccess.Schema import DBTables, DBViews
+from Exceptions.Exceptions import MemberAlreadyActivatedError, MemberAlreadyDeactivatedError
+from Models.Models import MemberModel, MemberWithoutPasswordViewModel, PlainUserModel, UnsetType
+from Models.Schema import DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 from DataAccess.UserRepository import UserRepository
 
