@@ -31,6 +31,7 @@ class DBViews:
     MEMBER_VIEW = '"MemberView"'
     MEMBER_WITHOUT_PASSWORD_VIEW = '"MemberWithoutPasswordView"'
     MEMBERS_BORROW_REQUEST_VIEW = '"MembersBorrowRequestView"'
+    MESSAGE_VIEW = '"MessageView"'
     PUBLISHER_VIEW = '"PublisherView"'
     USER_VIEW = '"UserView"'
     USER_WITHOUT_PASSWORD_VIEW = '"UserWithoutPasswordView"'
@@ -202,6 +203,14 @@ class DBViewColumns:
         HANDLED_AT = "handled_at"
         HANDLED_BY = "handled_by"
         NOTE = "note"
+
+    class MessageView:
+        ID = 'id'
+        TO = 'to'
+        RECEIVER_ROLE = 'receiver_role'
+        MESSAGE = 'message'
+        CREATED_TIME = 'created_time'
+        SEEN = 'seen'
 
     class PublisherView:
         ID = "id"

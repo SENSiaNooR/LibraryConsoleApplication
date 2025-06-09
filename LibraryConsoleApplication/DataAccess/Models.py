@@ -240,6 +240,15 @@ class MembersBorrowRequestViewModel:
     note: Union[str, None, UnsetType] = UNSET
 
 @dataclass
+class MessageViewModel:
+    id: Union[int, None, UnsetType] = UNSET
+    to: Union[str, None, UnsetType] = UNSET
+    receiver_role: Union[UserType, None, UnsetType] = UNSET
+    message: Union[str, None, UnsetType] = UNSET
+    created_time: Union[datetime, None, UnsetType] = UNSET
+    seen: Union[bool, None, UnsetType] = UNSET
+
+@dataclass
 class PublisherViewModel:
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
