@@ -23,3 +23,7 @@ class MemberAlreadyActivatedError(Exception):
 class AuthenticationFailed(Exception):
     def __init__(self, message="Authentication failed"):
         super().__init__(message)
+        
+class BookOutOfStockError(Exception):
+    """Raise when book is out of stock"""
+    pass

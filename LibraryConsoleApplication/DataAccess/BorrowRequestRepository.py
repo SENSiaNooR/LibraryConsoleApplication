@@ -1,4 +1,3 @@
-from ast import Str
 from datetime import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -7,11 +6,10 @@ from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from DataAccess.MemberRepository import MemberRepository
 from DataAccess.BookRepository import BookRepository
 from DataAccess.LibrarianRepository import LibrarianRepository
-from Exceptions.Exceptions import AuthenticationFailed, NotSuchModelInDataBaseError
-from Models.Models import BookModel, BorrowRequestModel, BorrowRequestStatus, LibrarianModel, MemberModel, MembersBorrowRequestViewModel, PlainUserModel, UserModel, UserType, UserViewModel
-from Models.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
+from Exceptions.Exceptions import BookOutOfStockError, NotSuchModelInDataBaseError
+from Models.Models import BookModel, BorrowRequestModel, BorrowRequestStatus, LibrarianModel, MemberModel, MembersBorrowRequestViewModel
+from Models.Schema import DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
-from PasswordManagement import PasswordManager
 
 
 class BorrowRequestRepository(BaseRepository):
@@ -64,6 +62,9 @@ class BorrowRequestRepository(BaseRepository):
         
         if book_db_model is None:
             raise NotSuchModelInDataBaseError('can not find book', book_model)
+
+        if book_db_model.available_copies == 0:
+            raise BookOutOfStockError()
 
         now = datetime.now(ZoneInfo("Asia/Tehran"))
         status = BorrowRequestStatus.pending
