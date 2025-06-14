@@ -5,7 +5,7 @@ from Exceptions.Exceptions import AuthenticationFailed, NotSuchModelInDataBaseEr
 from Models.Models import PlainUserModel, UserModel, UserType, UserViewModel
 from Models.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
 from psycopg2.extensions import cursor as PgCursor
-from PasswordManagement import PasswordManager
+from Core.PasswordManagement import PasswordManager
 
 
 class UserRepository(BaseRepository):

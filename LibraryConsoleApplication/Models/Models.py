@@ -105,7 +105,7 @@ class CategoryModel:
 @dataclass
 class GuestModel:
     id: Union[UUID, None, UnsetType] = UNSET
-    create_time: Union[datetime, None, UnsetType] = UNSET
+    created_time: Union[datetime, None, UnsetType] = UNSET
     request_count: Union[int, None, UnsetType] = UNSET
 
 @dataclass
