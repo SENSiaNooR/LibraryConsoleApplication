@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Core\JWT.py</StartupFile>
+    <StartupFile>DataAccess\GuestRepository.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -72,6 +72,7 @@
   <ItemGroup>
     <Content Include=".env" />
     <Content Include=".env.example" />
+    <Content Include="Presentation\ConsoleUI\template.txt" />
     <Content Include="requirements.txt" />
   </ItemGroup>
   <ItemGroup>
