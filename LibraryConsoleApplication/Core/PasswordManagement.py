@@ -3,9 +3,11 @@ import re
 from dotenv import load_dotenv
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, VerificationError
+from pathlib import Path
 
 class PasswordManager:
     _instance = None
+    _env_loaded = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -14,7 +16,12 @@ class PasswordManager:
         return cls._instance
 
     def _init_once(self):
-        load_dotenv()
+        
+        if not PasswordManager._env_loaded:
+            current_dir = Path(__file__).resolve().parent
+            dotenv_path = current_dir.parent / ".env"
+            load_dotenv(dotenv_path=dotenv_path)
+            PasswordManager._env_loaded = True
 
         self.ph = PasswordHasher(
             time_cost = int(os.getenv("HASH_TIME_COST")),

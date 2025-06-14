@@ -1,4 +1,4 @@
-from typing import Optional
+﻿from typing import Optional
 from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from Exceptions.Exceptions import AuthenticationFailed, NotSuchModelInDataBaseError

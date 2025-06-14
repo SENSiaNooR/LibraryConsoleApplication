@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>DataAccess\MemberRepository.py</StartupFile>
+    <StartupFile>Core\JWT.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -43,17 +43,20 @@
     <Compile Include="DataAccess\SqlBuilder.py" />
     <Compile Include="DataAccess\UserRepository.py" />
     <Compile Include="DataAccess\__init__.py" />
-    <Compile Include="JWT.py" />
-    <Compile Include="LibraryConsoleApplication.py" />
+    <Compile Include="Core\JWT.py" />
     <Compile Include="Models\__init__.py" />
-    <Compile Include="PasswordManagement.py" />
+    <Compile Include="Core\PasswordManagement.py" />
+    <Compile Include="Presentation\ConsoleUI\ConsoleApp.py" />
+    <Compile Include="Presentation\ConsoleUI\__init__.py" />
+    <Compile Include="Presentation\WebUI\__init__.py" />
+    <Compile Include="Presentation\__init__.py" />
     <Compile Include="Services\AdminServices.py" />
     <Compile Include="Services\BaseServices.py" />
     <Compile Include="Services\GuestServices.py" />
     <Compile Include="Services\LibrarianServices.py" />
     <Compile Include="Services\MemberServices.py" />
     <Compile Include="Services\__init__.py" />
-    <Compile Include="Validations.py" />
+    <Compile Include="Core\Validations.py" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
@@ -75,6 +78,10 @@
     <Folder Include="DataAccess\" />
     <Folder Include="Models\" />
     <Folder Include="Exceptions\" />
+    <Folder Include="Core\" />
+    <Folder Include="Presentation\" />
+    <Folder Include="Presentation\ConsoleUI\" />
+    <Folder Include="Presentation\WebUI\" />
     <Folder Include="Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

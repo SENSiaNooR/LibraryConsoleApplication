@@ -4,9 +4,11 @@ import jwt
 from datetime import datetime, timedelta
 from typing import Optional, Dict
 from dotenv import load_dotenv
+from pathlib import Path
 
 class JWTManager:
     _instance = None
+    _env_loaded = False
 
     def __new__(cls):
         if cls._instance is None:
@@ -15,7 +17,12 @@ class JWTManager:
         return cls._instance
 
     def _init_once(self):
-        load_dotenv()
+        
+        if not JWTManager._env_loaded:
+            current_dir = Path(__file__).resolve().parent
+            dotenv_path = current_dir.parent / ".env"
+            load_dotenv(dotenv_path=dotenv_path)
+            JWTManager._env_loaded = True
 
         self.secret_key = os.getenv("JWT_SECRET_KEY")
         self.algorithm = os.getenv("JWT_ALGORITHM")
