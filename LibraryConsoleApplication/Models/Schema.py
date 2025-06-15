@@ -27,6 +27,7 @@ class DBViews:
     BOOK_VIEW = '"BookView"'
     BORROWING_VIEW = '"BorrowingView"'
     CATEGORY_VIEW = '"CategoryView"'
+    LIBRARIAN_ACTIVITY_LOG_VIEW = '"LibrarianActivityLogView"'
     LIBRARIAN_VIEW = '"LibrarianView"'
     MEMBER_VIEW = '"MemberView"'
     MEMBER_WITHOUT_PASSWORD_VIEW = '"MemberWithoutPasswordView"'
