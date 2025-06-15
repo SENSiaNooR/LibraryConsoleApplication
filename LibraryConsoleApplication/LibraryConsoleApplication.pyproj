@@ -4,7 +4,11 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
+<<<<<<< HEAD
     <StartupFile>DataAccess\LibrarianActivityLogRepository.py</StartupFile>
+=======
+    <StartupFile>DataAccess\GuestRepository.py</StartupFile>
+>>>>>>> ba19d45f85944a5c5ee7794b9388b00c777fc5fe
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
