@@ -1,69 +1,45 @@
 from datetime import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
-from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from DataAccess.MemberRepository import MemberRepository
+from DataAccess.Decorators import forbidden_method
 from DataAccess.BookRepository import BookRepository
-from DataAccess.LibrarianRepository import LibrarianRepository
-from Exceptions.Exceptions import BookOutOfStockError, NotSuchModelInDataBaseError
-from Models.Models import BookModel, BorrowRequestModel, BorrowRequestStatus, BorrowingModel, BorrowingViewModel, LibrarianModel, MemberModel, MembersBorrowRequestViewModel
-from Models.Schema import DBTables, DBViews
+from Exceptions.Exceptions import AlreadyReturnedBookError, BookOutOfStockError, NotSuchModelInDataBaseError
+from Models.Models import BookModel, BorrowingModel, BorrowingViewModel
+from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
 
-class BorrowingRepository(BaseRepository):
+class BorrowingRepository(CommonQueriesRepository):
+
+    table_name = DBTables.BORROWING
+    view_name = DBViews.BORROWING_VIEW
+    model_class = BorrowingModel
+    view_model_class = BorrowingViewModel
+    insert_clause_exclude = {
+        DBTableColumns.Borrowing.ID
+    }
+    set_clause_exclude = {
+        DBTableColumns.Borrowing.ID,
+        DBTableColumns.Borrowing.MEMBER_ID,
+        DBTableColumns.Borrowing.BOOK_ID,
+        DBTableColumns.Borrowing.START_DATE
+    }
+    where_clause_exclude = set()
+
+
+    # Methods
 
     @classmethod
-    @map_to_single_model(BorrowingModel)
-    def get_borrowing(cls, model : BorrowingModel, cursor : Optional[PgCursor] = None) -> BorrowingModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.BORROWING,
-            cursor=cursor
-        )
-        
-    @classmethod
-    @map_to_single_model(BorrowingViewModel)
-    def get_borrowing_view(cls, model : BorrowingViewModel, cursor : Optional[PgCursor] = None) -> BorrowingViewModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBViews.BORROWING_VIEW,
-            cursor=cursor
-        )
-       
-    @classmethod
-    @map_to_model(BorrowingModel)
-    def get_borrowings(cls, model : BorrowingModel, cursor : Optional[PgCursor] = None) -> list[BorrowingModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBTables.BORROWING,
-            cursor=cursor
-        )
-        
-    @classmethod
-    @map_to_model(BorrowingViewModel)
-    def get_borrowings_view(cls, model : BorrowingViewModel, cursor : Optional[PgCursor] = None) -> list[BorrowingViewModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBViews.BORROWING_VIEW,
-            cursor=cursor
-        )
-
-    @classmethod
-    @map_to_single_model(BorrowingModel)
-    def add_borrowing(cls, member_model : MemberModel, book_model : BookModel, cursor : Optional[PgCursor] = None) -> BorrowingModel:
+    def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        member_db_model = MemberRepository.get_member(member_model, cursor)
-        book_db_model = BookRepository.get_book(book_model, cursor)
-        
-        if member_db_model is None:
-            raise NotSuchModelInDataBaseError('can not find member', member_model)
+        book_model = BookModel(id = model.book_id)
+        book_db_model = BookRepository.get_one(book_model, cursor)
         
         if book_db_model is None:
             raise NotSuchModelInDataBaseError('can not find book', book_model)
@@ -73,60 +49,94 @@ class BorrowingRepository(BaseRepository):
 
         now = datetime.now(ZoneInfo("Asia/Tehran"))
 
-        model = BorrowingModel(
-            member_id=member_db_model.id,
-            book_id=book_db_model.id,
-            start_date=now,
-            end_date=None,
-            returned=False
-        )
+        model.start_date=now
+        model.end_date=None
+        model.returned=False
 
-        result = CommonQueriesRepository.add_record(
-            model=model,
-            table=DBTables.BORROWING,
-            cursor=cursor
-        )
+        result = super().add(model, cursor)
         
         book_db_model.available_copies -= 1
-        BookRepository.update_book(book_db_model, cursor=cursor)
+        BookRepository.update(book_db_model, cursor)
     
         if commit_and_close:
             cursor.connection.commit()
             cursor.connection.close()
          
         return result
-    
+
     @classmethod
-    def return_book(cls, borrowing_model : BorrowingModel, cursor : Optional[PgCursor] = None) -> None:
+    def return_book(cls, model : BorrowingModel, cursor : Optional[PgCursor] = None) -> None:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
             
-        borrowing_db_model = cls.get_borrowing(borrowing_model,cursor)
+        borrowing_db_model = cls.get_one(model,cursor)
         
         if borrowing_db_model is None:
-            raise NotSuchModelInDataBaseError('can not find borrowing record', borrowing_model)
+            raise NotSuchModelInDataBaseError('can not find borrowing record', model)
+        
+        if borrowing_db_model.returned is True:
+            raise AlreadyReturnedBookError()
         
         borrowing_db_model.returned = True
         borrowing_db_model.end_date = datetime.now(ZoneInfo("Asia/Tehran"))
 
-        result = CommonQueriesRepository.update_record(
-            model=borrowing_db_model,
-            table=DBTables.BORROWING,
-            cursor=cursor
-        )
+        super().update(borrowing_db_model, cursor)
         
-        book_db_model = BookRepository.get_book(BookModel(id=borrowing_db_model.book_id),cursor=cursor)
+        book_db_model = BookRepository.get_one(BookModel(id=borrowing_db_model.book_id),cursor=cursor)
         book_db_model.available_copies += 1
-        BookRepository.update_book(book_db_model,cursor=cursor)
+        BookRepository.update(book_db_model,cursor=cursor)
     
         if commit_and_close:
             cursor.connection.commit()
             cursor.connection.close()
+
+
+    # Inherited Methods
+
+    @classmethod
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
+       
+    @classmethod
+    def get_many(cls, model : model_class, cursor : Optional[PgCursor] = None) -> list[model_class]:
+        return super().get_many(model, cursor)
+    
+    @classmethod
+    def view_one(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> Optional[view_model_class]:
+        return super().view_one(model, cursor)
+       
+    @classmethod
+    def view_many(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> list[view_model_class]:
+        return super().view_many(model, cursor)
+
+
+    # Forbidden Methods
             
-        return result
+    @classmethod
+    @forbidden_method
+    def update(cls, model, cursor: Optional[PgCursor] = None):
+        pass
+            
+    @classmethod
+    @forbidden_method
+    def delete(cls, id : int, cursor: Optional[PgCursor] = None):
+        pass
+    
+    @classmethod
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
+
+    @classmethod
+    @forbidden_method
+    def clear(cls, cursor: Optional[PgCursor] = None):
+        pass
+
+    
+    
     
     
             

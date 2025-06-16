@@ -4,11 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-<<<<<<< HEAD
-    <StartupFile>DataAccess\LibrarianActivityLogRepository.py</StartupFile>
-=======
-    <StartupFile>DataAccess\GuestRepository.py</StartupFile>
->>>>>>> ba19d45f85944a5c5ee7794b9388b00c777fc5fe
+    <StartupFile>DataAccess\AuthorRepository.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -28,12 +24,15 @@
   <ItemGroup>
     <Compile Include="DataAccess\AuthorRepository.py" />
     <Compile Include="DataAccess\BaseRepository.py" />
+    <Compile Include="DataAccess\BookAuthorRepository.py" />
+    <Compile Include="DataAccess\BookCategoryRepository.py" />
     <Compile Include="DataAccess\BookRepository.py" />
     <Compile Include="DataAccess\BorrowingRepository.py" />
     <Compile Include="DataAccess\BorrowRequestRepository.py" />
     <Compile Include="DataAccess\CategoryRepository.py" />
     <Compile Include="DataAccess\CommonQueriesRepository.py" />
     <Compile Include="DataAccess\Connection.py" />
+    <Compile Include="DataAccess\Decorators.py" />
     <Compile Include="Exceptions\Exceptions.py" />
     <Compile Include="DataAccess\GuestRepository.py" />
     <Compile Include="DataAccess\LibrarianActivityLogRepository.py" />
@@ -61,6 +60,7 @@
     <Compile Include="Services\MemberServices.py" />
     <Compile Include="Services\__init__.py" />
     <Compile Include="Core\Validations.py" />
+    <Compile Include="Tests\TestAuthorRepository.py" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
@@ -84,6 +84,7 @@
     <Folder Include="Models\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Core\" />
+    <Folder Include="Tests\" />
     <Folder Include="Presentation\" />
     <Folder Include="Presentation\ConsoleUI\" />
     <Folder Include="Presentation\WebUI\" />

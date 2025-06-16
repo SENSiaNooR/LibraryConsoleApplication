@@ -1,83 +1,85 @@
 ﻿
 from datetime import datetime
-from os import name
 from typing import Optional
 from zoneinfo import ZoneInfo
-from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from Models.Models import LibrarianActivityLogModel, LibrarianActivityLogViewModel, PublisherModel, PublisherViewModel
-from Models.Schema import DBTables, DBViews
+from DataAccess.Decorators import forbidden_method
+from Models.Models import LibrarianActivityLogModel, LibrarianActivityLogViewModel
+from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
 
-class LibrarianActivityLogRepository(BaseRepository):
+class LibrarianActivityLogRepository(CommonQueriesRepository):
+    
+    table_name = DBTables.LIBRARIAN_ACTIVITY_LOG
+    view_name = DBViews.LIBRARIAN_ACTIVITY_LOG_VIEW
+    model_class = LibrarianActivityLogModel
+    view_model_class = LibrarianActivityLogViewModel
+    insert_clause_exclude = {
+        DBTableColumns.LibrarianActivityLog.ID
+    }
+    set_clause_exclude = {
+        DBTableColumns.LibrarianActivityLog.ID,
+        DBTableColumns.LibrarianActivityLog.LIBRARIAN_ID,
+        DBTableColumns.LibrarianActivityLog.ACTION_TYPE,
+        DBTableColumns.LibrarianActivityLog.MEMBER_ID,
+        DBTableColumns.LibrarianActivityLog.BOOK_ID,
+        DBTableColumns.LibrarianActivityLog.TIMESTAMP
+    }
+    where_clause_exclude = set()
+
+
+    # Methods
     
     @classmethod
-    @map_to_single_model(LibrarianActivityLogModel)
-    def get_log(cls, model : LibrarianActivityLogModel, cursor : Optional[PgCursor] = None) -> LibrarianActivityLogModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.LIBRARIAN_ACTIVITY_LOG,
-            cursor=cursor
-        )
-    
+    def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
+        now = datetime.now(ZoneInfo("Asia/Tehran"))
+        model.timestamp = now
+        return super().add(model, cursor)
+
+
+
+    # Inherited Methods
+
     @classmethod
-    @map_to_single_model(LibrarianActivityLogViewModel)
-    def get_log_view(cls, model : LibrarianActivityLogViewModel, cursor : Optional[PgCursor] = None) -> LibrarianActivityLogViewModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBViews.LIBRARIAN_ACTIVITY_LOG_VIEW,
-            cursor=cursor
-        )
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
        
     @classmethod
-    @map_to_model(LibrarianActivityLogModel)
-    def get_logs(cls, model : LibrarianActivityLogModel, cursor : Optional[PgCursor] = None) -> list[LibrarianActivityLogModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBTables.LIBRARIAN_ACTIVITY_LOG,
-            cursor=cursor
-        )
+    def get_many(cls, model : model_class, cursor : Optional[PgCursor] = None) -> list[model_class]:
+        return super().get_many(model, cursor)
     
     @classmethod
-    @map_to_model(LibrarianActivityLogViewModel)
-    def get_logs_view(cls, model : LibrarianActivityLogViewModel, cursor : Optional[PgCursor] = None) -> list[LibrarianActivityLogViewModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBViews.LIBRARIAN_ACTIVITY_LOG_VIEW,
-            cursor=cursor
-        )
+    def view_one(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> Optional[view_model_class]:
+        return super().view_one(model, cursor)
+       
+    @classmethod
+    def view_many(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> list[view_model_class]:
+        return super().view_many(model, cursor)
 
     @classmethod
-    @map_to_single_model(LibrarianActivityLogModel)
-    def add_log(cls, model : LibrarianActivityLogModel, cursor : Optional[PgCursor] = None) -> LibrarianActivityLogModel:
-        now = datetime.now(ZoneInfo('Asia/Tehran'))
-        model.timestamp = now
+    def clear(cls, cursor: Optional[PgCursor] = None) -> None:
+        return super().clear(cursor)
+    
 
-        return CommonQueriesRepository.add_record(
-            model=model,
-            table=DBTables.LIBRARIAN_ACTIVITY_LOG,
-            cursor=cursor
-        )
+    # Forbidden Methods
+    
+    @classmethod
+    @forbidden_method
+    def update(cls, model, cursor: Optional[PgCursor] = None):
+        pass
             
     @classmethod
-    def clear_table(cls, cursor: Optional[PgCursor] = None) -> None:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        query = f"""
-            DELETE FROM {DBTables.LIBRARIAN_ACTIVITY_LOG}
-        """
+    @forbidden_method
+    def delete(cls, id : int, cursor: Optional[PgCursor] = None):
+        pass
     
-        cursor.execute(query)
-
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
+    @classmethod
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
   
+
 
 if __name__ == '__main__':
     

@@ -1,14 +1,31 @@
 ﻿from typing import Optional
-from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
+from DataAccess.Decorators import forbidden_method
 from Exceptions.Exceptions import AuthenticationFailed, NotSuchModelInDataBaseError
 from Models.Models import PlainUserModel, UserModel, UserType, UserViewModel
-from Models.Schema import DBTableColumns, DBTables, DBViewColumns, DBViews
+from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 from Core.PasswordManagement import PasswordManager
 
 
-class UserRepository(BaseRepository):
+class UserRepository(CommonQueriesRepository):
+    
+    table_name = DBTables.USER
+    view_name = DBViews.USER_VIEW
+    model_class = UserModel
+    view_model_class = UserViewModel
+    insert_clause_exclude = {
+        DBTableColumns.User.ID    
+    }
+    set_clause_exclude = {
+        DBTableColumns.User.ID    
+    }
+    where_clause_exclude = {
+        DBTableColumns.User.HASHED_PASSWORD    
+    }
+    
+
+    # Methods
     
     @classmethod
     def verify_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> bool:
@@ -21,26 +38,14 @@ class UserRepository(BaseRepository):
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        query = (
-            f"""
-            SELECT * FROM {DBTables.USER} 
-            WHERE {DBTableColumns.User.USERNAME} = %s
-            """
-        )
-        
-        cursor.execute(query, (plain_user_model.username,))
-        
-        if cursor.rowcount == 0:
-            return False
-     
-        user = cursor.fetchone()
-        user_model = UserModel(*user)
-        
+        model = UserModel(username = plain_user_model.username)
+        db_model = cls.get_one(model, cursor)
+    
         password_manager = PasswordManager()
         
         verification = password_manager.verify_password(
             plain_password=plain_user_model.password,
-            hashed_password=user_model.hashed_password
+            hashed_password=db_model.hashed_password
         )
         
         if commit_and_close:
@@ -48,46 +53,6 @@ class UserRepository(BaseRepository):
             cursor.connection.close()
             
         return verification
-
-    @classmethod
-    @map_to_single_model(UserModel)
-    def get_user(cls, model : UserModel, cursor : Optional[PgCursor] = None) -> UserModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.USER,
-            exclude={DBTableColumns.User.HASHED_PASSWORD},
-            cursor=cursor
-        )
-        
-    @classmethod
-    @map_to_single_model(UserViewModel)
-    def get_user_view(cls, model : UserViewModel, cursor : Optional[PgCursor] = None) -> UserViewModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBViews.USER_VIEW,
-            exclude={DBViewColumns.UserView.HASHED_PASSWORD},
-            cursor=cursor
-        )
-       
-    @classmethod
-    @map_to_model(UserModel)
-    def get_users(cls, model : UserModel, cursor : Optional[PgCursor] = None) -> list[UserModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBTables.USER,
-            exclude={DBTableColumns.User.HASHED_PASSWORD},
-            cursor=cursor
-        )
-    
-    @classmethod
-    @map_to_model(UserViewModel)
-    def get_users_view(cls, model : UserViewModel, cursor : Optional[PgCursor] = None) -> list[UserViewModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBViews.USER_VIEW,
-            exclude={DBViewColumns.UserView.HASHED_PASSWORD},
-            cursor=cursor
-        )
 
     @classmethod
     def hash_password_and_add_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> UserModel:
@@ -100,17 +65,8 @@ class UserRepository(BaseRepository):
             username=plain_user_model.username,
             hashed_password=hashed_password
         )
-        return cls.add_user(model,cursor)
+        return cls.add(model,cursor)
 
-    @classmethod
-    @map_to_single_model(UserModel)
-    def add_user(cls, model : UserModel, cursor : Optional[PgCursor] = None) -> UserModel:
-        return CommonQueriesRepository.add_record(
-            model=model,
-            table=DBTables.USER,
-            cursor=cursor
-        )
-    
     @classmethod
     def change_password(cls, plain_user_model : PlainUserModel, new_password : str, cursor : Optional[PgCursor] = None) -> None:
         
@@ -149,7 +105,7 @@ class UserRepository(BaseRepository):
             commit_and_close = True
 
         model = UserViewModel(username=username, user_type=user_type)
-        user = cls.get_user_view(model, cursor=cursor)
+        user = cls.view_one(model, cursor=cursor)
     
         if not user:
             raise NotSuchModelInDataBaseError(f"Cannot find {user_type.value}", model)
@@ -202,25 +158,69 @@ class UserRepository(BaseRepository):
         if commit_and_close:
             cursor.connection.commit()
             cursor.connection.close()
+
+
+    # Inherited Methods
+
+    @classmethod
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
+       
+    @classmethod
+    def get_many(cls, model : model_class, cursor : Optional[PgCursor] = None) -> list[model_class]:
+        return super().get_many(model, cursor)
     
     @classmethod
-    def delete_user(cls, username: str, cursor: Optional[PgCursor] = None) -> None:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        query = f"""
-            DELETE FROM {DBTables.USER}
-            WHERE {DBTableColumns.User.USERNAME} = %s
-        """
+    def view_one(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> Optional[view_model_class]:
+        return super().view_one(model, cursor)
+       
+    @classmethod
+    def view_many(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> list[view_model_class]:
+        return super().view_many(model, cursor)
     
-        cursor.execute(query, (username,))
+    @classmethod
+    def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
+        return super().add(model, cursor)
+                
+    @classmethod
+    def delete(cls, id : int, cursor: Optional[PgCursor] = None) -> None:
+        return super().delete(id, cursor)
+    
 
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
+    # Forbidden Methods
+           
+    @classmethod
+    @forbidden_method
+    def update(cls, model, cursor: Optional[PgCursor] = None):
+        pass
+                
+    @classmethod
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
+
+    @classmethod
+    @forbidden_method
+    def clear(cls, cursor: Optional[PgCursor] = None):
+        pass
+
+
+
+
+
+
+
+    
+
+
+    
+
+        
+    
+    
+
+
+
     
 if __name__ == '__main__':
     

@@ -1,76 +1,81 @@
-from typing import Optional
+﻿from typing import Optional
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from Models.Schema import DBTables, DBViews
+from DataAccess.Decorators import forbidden_method
+from Models.Schema import DBTableColumns, DBTables, DBViews
 from Models.Models import AuthorModel, AuthorViewModel
-from BaseRepository import BaseRepository, map_to_single_model
-from BaseRepository import map_to_model
 from psycopg2.extensions import cursor as PgCursor
 
-class AuthorRepository(BaseRepository):
+class AuthorRepository(CommonQueriesRepository):
+
+    table_name = DBTables.AUTHOR
+    view_name = DBViews.AUTHOR_VIEW
+    model_class = AuthorModel
+    view_model_class = AuthorViewModel
+    insert_clause_exclude = {
+        DBTableColumns.Author.ID    
+    }
+    set_clause_exclude = {
+        DBTableColumns.Author.ID    
+    }
+    where_clause_exclude = set()
+
+
+    # Inherited Methods
 
     @classmethod
-    @map_to_single_model(AuthorModel)
-    def get_category(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> AuthorModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.AUTHOR,
-            cursor=cursor
-        )
-        
-    @classmethod
-    @map_to_single_model(AuthorViewModel)
-    def get_category_view(cls, model : AuthorViewModel, cursor : Optional[PgCursor] = None) -> AuthorViewModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBViews.AUTHOR_VIEW,
-            cursor=cursor
-        )
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
        
     @classmethod
-    @map_to_model(AuthorModel)
-    def get_categories(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> list[AuthorModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBTables.AUTHOR,
-            cursor=cursor
-        )
+    def get_many(cls, model : model_class, cursor : Optional[PgCursor] = None) -> list[model_class]:
+        return super().get_many(model, cursor)
     
     @classmethod
-    @map_to_model(AuthorViewModel)
-    def get_categories_view(cls, model : AuthorViewModel, cursor : Optional[PgCursor] = None) -> list[AuthorViewModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBViews.AUTHOR_VIEW,
-            cursor=cursor
-        )
-
+    def view_one(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> Optional[view_model_class]:
+        return super().view_one(model, cursor)
+       
     @classmethod
-    @map_to_single_model(AuthorModel)
-    def add_category(cls, model : AuthorModel, cursor : Optional[PgCursor] = None) -> AuthorModel:
-        return CommonQueriesRepository.add_record(
-            model=model,
-            table=DBTables.AUTHOR,
-            cursor=cursor
-        )
+    def view_many(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> list[view_model_class]:
+        return super().view_many(model, cursor)
     
     @classmethod
-    def update_category(cls, model: AuthorModel, cursor: Optional[PgCursor] = None) -> None:
-        return CommonQueriesRepository.update_record(
-            model=model,
-            table=DBTables.AUTHOR,
-            cursor=cursor
-        )
-
+    def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
+        return super().add(model, cursor)
+    
     @classmethod
-    def delete_category(cls, id: int, cursor: Optional[PgCursor] = None) -> None:
-        return CommonQueriesRepository.delete_record(
-            id=id,
-            table=DBTables.AUTHOR,
-            cursor=cursor
-        )
+    def update(cls, model : model_class, cursor: Optional[PgCursor] = None) -> None:
+        return super().update(model, cursor)
+            
+    @classmethod
+    def delete(cls, id : int, cursor: Optional[PgCursor] = None) -> None:
+        return super().delete(id, cursor)
+    
+
+    # Forbidden Methods
+    
+    @classmethod
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
+    
+    @classmethod
+    @forbidden_method
+    def clear(cls, cursor: Optional[PgCursor] = None):
+        pass
+    
+
+    
     
 
 
 if __name__ == '__main__':
-
-    pass
+    
+    model = AuthorModel(name = 'رها جهانشاهی', biography='یه نویسنده پر تلاش')
+    
+    AuthorRepository.add(model)
+    
+    res1 = AuthorRepository.get_many(AuthorModel())
+    print('[')
+    for row in res1:
+        print(f'\t{row}')
+    print(']')

@@ -2,90 +2,42 @@
 from datetime import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
+from DataAccess.Decorators import forbidden_method
 from Exceptions.Exceptions import NotSuchModelInDataBaseError
 from DataAccess.UserRepository import UserRepository
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
+from DataAccess.BaseRepository import map_to_model
 from Models.Models import MessageModel, MessageViewModel, UserModel
 from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
 
-class MessageRepository(BaseRepository):
+class MessageRepository(CommonQueriesRepository):
     
-    @classmethod
-    @map_to_single_model(MessageModel)
-    def get_message(cls, model : MessageModel, cursor : Optional[PgCursor] = None) -> MessageModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.MESSAGE,
-            cursor=cursor
-        )
-        
-    @classmethod
-    @map_to_single_model(MessageViewModel)
-    def get_message_view(cls, model : MessageViewModel, cursor : Optional[PgCursor] = None) -> MessageViewModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBViews.MESSAGE_VIEW,
-            cursor=cursor
-        )
-       
-    @classmethod
-    @map_to_model(MessageModel)
-    def get_messages(cls, model : MessageModel, cursor : Optional[PgCursor] = None) -> list[MessageModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBTables.MESSAGE,
-            cursor=cursor
-        )
+    table_name = DBTables.MESSAGE
+    view_name = DBViews.MESSAGE_VIEW
+    model_class = MessageModel
+    view_model_class = MessageViewModel
+    insert_clause_exclude = {
+        DBTableColumns.Message.ID,
+        DBTableColumns.Message.SEEN
+    }
+    set_clause_exclude = {
+        DBTableColumns.Message.ID,
+        DBTableColumns.Message.USER_ID,
+        DBTableColumns.Message.MESSAGE,
+        DBTableColumns.Message.CREATED_TIME
+    }
+    where_clause_exclude = set()
     
-    @classmethod
-    @map_to_model(MessageViewModel)
-    def get_messages_view(cls, model : MessageViewModel, cursor : Optional[PgCursor] = None) -> list[MessageViewModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBViews.MESSAGE_VIEW,
-            cursor=cursor
-        )
 
-    def _prepare_message_model(cls, receiver_model : UserModel, message : str, cursor : Optional[PgCursor] = None) -> MessageModel:
-        user_model = UserRepository.get_user(receiver_model, cursor)
+    # Methods
     
-        if user_model is None:
-            raise NotSuchModelInDataBaseError('can not found user', receiver_model)
-    
+    @classmethod
+    def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
         now = datetime.now(ZoneInfo("Asia/Tehran"))
-
-        return MessageModel(
-            user_id=user_model.id,
-            message=message,
-            created_time=now,
-            seen=False
-        )
-
-    @classmethod
-    @map_to_single_model(MessageModel)
-    def send_message(cls, receiver_model : UserModel, message : str, cursor : Optional[PgCursor] = None) -> MessageModel:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-        
-        message_model = cls._prepare_message_model(receiver_model, message, cursor)
-
-        result = CommonQueriesRepository.add_record(
-            model=message_model,
-            table=DBTables.MESSAGE,
-            cursor=cursor
-        )
-        
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
-            
-        return result
+        model.created_time = now
+        return super().add(model, cursor)
     
     @classmethod
     def _update_seen(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> None:
@@ -95,10 +47,10 @@ class MessageRepository(BaseRepository):
             cursor = cls._get_cursor()
             commit_and_close = True 
         
-        model = UserRepository.get_user(user_model, cursor)
+        model = UserRepository.get_one(user_model, cursor)
         
         if model is None:
-            raise NotSuchModelInDataBaseError('can not found user', user_model)
+            raise NotSuchModelInDataBaseError('user not found', user_model)
         
         query = f"""
             UPDATE {DBTables.MESSAGE}
@@ -114,21 +66,21 @@ class MessageRepository(BaseRepository):
 
     @classmethod
     @map_to_model(MessageViewModel)
-    def get_inbox(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> list[MessageViewModel]:
+    def inbox(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> list[MessageViewModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        model = UserRepository.get_user(user_model, cursor)
+        model = UserRepository.get_one(user_model, cursor)
         
         if model is None:
-            raise NotSuchModelInDataBaseError('can not found user', user_model)
+            raise NotSuchModelInDataBaseError('user not found', user_model)
         
         message_model = MessageViewModel(to=model.username)
         
-        result = cls.get_messages_view(message_model, cursor)
+        result = cls.view_many(message_model, cursor)
         
         cls._update_seen(user_model, cursor)
 
@@ -140,21 +92,21 @@ class MessageRepository(BaseRepository):
 
     @classmethod
     @map_to_model(MessageViewModel)
-    def get_unread_inbox(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> list[MessageViewModel]:
+    def unread_inbox(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> list[MessageViewModel]:
         
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        model = UserRepository.get_user(user_model, cursor)
+        model = UserRepository.get_one(user_model, cursor)
         
         if model is None:
-            raise NotSuchModelInDataBaseError('can not found user', user_model)
+            raise NotSuchModelInDataBaseError('user not found', user_model)
         
         message_model = MessageViewModel(to=model.username, seen=False)
         
-        result = cls.get_messages_view(message_model, cursor)
+        result = cls.view_many(message_model, cursor)
         
         cls._update_seen(user_model, cursor)
 
@@ -163,21 +115,45 @@ class MessageRepository(BaseRepository):
             cursor.connection.close()
 
         return result
+
+
+    # Inherited Methods
+
+    @classmethod
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
+       
+    @classmethod
+    def get_many(cls, model : model_class, cursor : Optional[PgCursor] = None) -> list[model_class]:
+        return super().get_many(model, cursor)
     
     @classmethod
-    def clear_table(cls, cursor: Optional[PgCursor] = None) -> None:
-        
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
+    def view_one(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> Optional[view_model_class]:
+        return super().view_one(model, cursor)
+       
+    @classmethod
+    def view_many(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> list[view_model_class]:
+        return super().view_many(model, cursor)
 
-        query = f"""
-            DELETE FROM {DBTables.MESSAGE}
-        """
+    @classmethod
+    def clear(cls, cursor: Optional[PgCursor] = None) -> None:
+        return super().clear(cursor)
     
-        cursor.execute(query)
 
-        if commit_and_close:
-            cursor.connection.commit()
-            cursor.connection.close()
+    # Forbidden Methods
+    
+    @classmethod
+    @forbidden_method
+    def update(cls, model, cursor: Optional[PgCursor] = None):
+        pass
+            
+    @classmethod
+    @forbidden_method
+    def delete(cls, id : int, cursor: Optional[PgCursor] = None):
+        pass
+    
+    @classmethod
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
+

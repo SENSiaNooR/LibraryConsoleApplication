@@ -2,68 +2,75 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID, uuid4
 from zoneinfo import ZoneInfo
-from DataAccess.BaseRepository import BaseRepository, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
+from DataAccess.Decorators import forbidden_method
 from Exceptions.Exceptions import NotSuchModelInDataBaseError
 from Models.Models import GuestModel
-from Models.Schema import DBTables
+from Models.Schema import DBTableColumns, DBTables
 from psycopg2.extensions import cursor as PgCursor
 import psycopg2.extras
 
 psycopg2.extras.register_uuid()
 
 
-class GuestRepository(BaseRepository):
+class GuestRepository(CommonQueriesRepository):
 
-    @classmethod
-    @map_to_single_model(GuestModel)
-    def get_guest(cls, uuid : UUID, cursor : Optional[PgCursor] = None) -> GuestModel:
-        model = GuestModel(id = uuid)
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.GUEST,
-            cursor=cursor
-        )
+    table_name = DBTables.GUEST
+    model_class = GuestModel
+    insert_clause_exclude = set()
+    set_clause_exclude = {
+        DBTableColumns.Guest.ID,
+        DBTableColumns.Guest.CREATED_TIME
+    }
+    where_clause_exclude = {
+        DBTableColumns.Guest.CREATED_TIME,
+        DBTableColumns.Guest.REQUEST_COUNT
+    }
+    
 
+    # Methods
+    
     @classmethod
-    @map_to_single_model(GuestModel)
-    def add_guest(cls, cursor : Optional[PgCursor] = None) -> GuestModel:
-                
+    def add(cls, cursor : Optional[PgCursor] = None) -> model_class:
         id = uuid4()
         now = datetime.now(ZoneInfo("Asia/Tehran"))
-        
-        guest_model = GuestModel(
+        model = GuestModel(
             id=id,
             created_time=now,
             request_count=0
         )
-        
-        return CommonQueriesRepository.add_record(
-            model=guest_model,
-            table=DBTables.GUEST,
-            exclude=set(),
-            cursor=cursor
-        )
+        return super().add(model, cursor)
     
     @classmethod
-    def increase_request(cls, uuid : UUID, cursor : Optional[PgCursor] = None) -> None:
+    def increase_request(cls, model : model_class, cursor : Optional[PgCursor] = None) -> None:
         
-        guest_db_model = cls.get_guest(uuid, cursor=cursor)
+        commit_and_close = False
+        if cursor is None:
+            cursor = cls._get_cursor()
+            commit_and_close = True
+            
+        db_model = cls.get_one(model, cursor)
         
-        if guest_db_model is None:
-            raise NotSuchModelInDataBaseError('can not find guest', GuestModel(id=uuid))
+        if db_model is None:
+            raise NotSuchModelInDataBaseError('can not find guest', model)
         
-        guest_db_model.request_count += 1
+        db_model.request_count += 1
+        
+        super().update(db_model, cursor)
 
-        return CommonQueriesRepository.update_record(
-            model=guest_db_model,
-            table=DBTables.GUEST,
-            cursor=cursor
-        )
-    
+        if commit_and_close:
+            cursor.connection.commit()
+            cursor.connection.close()
+
     @classmethod
-    def can_guest_request(cls, uuid: UUID, max_requests: int, max_minutes: int, cursor: Optional[PgCursor] = None) -> bool:
-        guest = cls.get_guest(uuid, cursor)
+    def can_guest_request(cls, model : model_class, max_requests: int, max_minutes: int, cursor: Optional[PgCursor] = None) -> bool:
+        
+        commit_and_close = False
+        if cursor is None:
+            cursor = cls._get_cursor()
+            commit_and_close = True
+        
+        guest = cls.get_one(model, cursor)
 
         if guest is None:
             raise NotSuchModelInDataBaseError('can not find guest', GuestModel(id=uuid))
@@ -71,39 +78,60 @@ class GuestRepository(BaseRepository):
         now = datetime.now(ZoneInfo("Asia/Tehran"))
         delta_minutes = (now - guest.created_time).total_seconds() / 60
 
-        if guest.request_count >= max_requests:
-            return False
-    
-        if delta_minutes >= max_minutes:
-            return False
-
-        return True
-
-    @classmethod
-    def delete_guest(cls, uuid : UUID, cursor : Optional[PgCursor] = None) -> None:
-        return CommonQueriesRepository.delete_record(
-            id=uuid,
-            table=DBTables.GUEST,
-            cursor=cursor
-        )
-
-    @classmethod
-    def clear_table(cls, cursor: Optional[PgCursor] = None) -> None:
+        result : bool = True
         
-        commit_and_close = False
-        if cursor is None:
-            cursor = cls._get_cursor()
-            commit_and_close = True
-
-        query = f"""
-            DELETE FROM {DBTables.GUEST}
-        """
+        if guest.request_count >= max_requests or delta_minutes >= max_minutes:
+            result = False
     
-        cursor.execute(query)
-
         if commit_and_close:
             cursor.connection.commit()
             cursor.connection.close()
+            
+        return result
+
+
+    # Inherited Methods
+
+    @classmethod
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
+                
+    @classmethod
+    def delete(cls, id : UUID, cursor: Optional[PgCursor] = None) -> None:
+        return super().delete(id, cursor)
+
+    @classmethod
+    def clear(cls, cursor: Optional[PgCursor] = None) -> None:
+        return super().clear(cursor)
+    
+
+    # Forbidden Methods
+          
+    @classmethod
+    @forbidden_method
+    def get_many(cls, model, cursor : Optional[PgCursor] = None):
+        pass
+    
+    @classmethod
+    @forbidden_method
+    def view_one(cls, model, cursor : Optional[PgCursor] = None):
+        pass
+       
+    @classmethod
+    @forbidden_method
+    def view_many(cls, model, cursor : Optional[PgCursor] = None):
+        pass
+    
+    @classmethod
+    @forbidden_method
+    def update(cls, model, cursor: Optional[PgCursor] = None):
+        pass
+   
+    @classmethod
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
+
             
 if __name__ == '__main__':
     
