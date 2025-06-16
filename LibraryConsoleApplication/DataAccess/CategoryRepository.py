@@ -1,74 +1,71 @@
 ﻿from typing import Optional
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
-from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
+from DataAccess.Decorators import forbidden_method
 from Models.Models import CategoryModel, CategoryViewModel
-from Models.Schema import DBTables, DBViews
+from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
 
-class CategoryRepository(BaseRepository):
+class CategoryRepository(CommonQueriesRepository):
     
+    table_name = DBTables.CATEGORY
+    view_name = DBViews.CATEGORY_VIEW
+    model_class = CategoryModel
+    view_model_class = CategoryViewModel
+    insert_clause_exclude = {
+        DBTableColumns.Category.ID
+    }
+    set_clause_exclude = {
+        DBTableColumns.Category.ID
+    }
+    where_clause_exclude = set()
+
+
+    # Inherited Methods
+
     @classmethod
-    @map_to_single_model(CategoryModel)
-    def get_category(cls, model : CategoryModel, cursor : Optional[PgCursor] = None) -> CategoryModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.CATEGORY,
-            cursor=cursor
-        )
-        
-    @classmethod
-    @map_to_single_model(CategoryViewModel)
-    def get_category_view(cls, model : CategoryViewModel, cursor : Optional[PgCursor] = None) -> CategoryViewModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBViews.CATEGORY_VIEW,
-            cursor=cursor
-        )
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
        
     @classmethod
-    @map_to_model(CategoryModel)
-    def get_categories(cls, model : CategoryModel, cursor : Optional[PgCursor] = None) -> list[CategoryModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBTables.CATEGORY,
-            cursor=cursor
-        )
+    def get_many(cls, model : model_class, cursor : Optional[PgCursor] = None) -> list[model_class]:
+        return super().get_many(model, cursor)
     
     @classmethod
-    @map_to_model(CategoryViewModel)
-    def get_categories_view(cls, model : CategoryViewModel, cursor : Optional[PgCursor] = None) -> list[CategoryViewModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBViews.CATEGORY_VIEW,
-            cursor=cursor
-        )
+    def view_one(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> Optional[view_model_class]:
+        return super().view_one(model, cursor)
+       
+    @classmethod
+    def view_many(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> list[view_model_class]:
+        return super().view_many(model, cursor)
+    
+    @classmethod
+    def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
+        return super().add(model, cursor)
+    
+    @classmethod
+    def update(cls, model : model_class, cursor: Optional[PgCursor] = None) -> None:
+        return super().update(model, cursor)
+            
+    @classmethod
+    def delete(cls, id : int, cursor: Optional[PgCursor] = None) -> None:
+        return super().delete(id, cursor)
+    
 
-    @classmethod
-    @map_to_single_model(CategoryModel)
-    def add_category(cls, model : CategoryModel, cursor : Optional[PgCursor] = None) -> CategoryModel:
-        return CommonQueriesRepository.add_record(
-            model=model,
-            table=DBTables.CATEGORY,
-            cursor=cursor
-        )
+    # Forbidden Methods
     
     @classmethod
-    def update_category(cls, model: CategoryModel, cursor: Optional[PgCursor] = None) -> None:
-        return CommonQueriesRepository.update_record(
-            model=model,
-            table=DBTables.CATEGORY,
-            cursor=cursor
-        )
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
+    
+    @classmethod
+    @forbidden_method
+    def clear(cls, cursor: Optional[PgCursor] = None):
+        pass
+ 
+    
 
-    @classmethod
-    def delete_category(cls, id: int, cursor: Optional[PgCursor] = None) -> None:
-        return CommonQueriesRepository.delete_record(
-            id=id,
-            table=DBTables.CATEGORY,
-            cursor=cursor
-        )
-    
 if __name__ == '__main__':
     model1 = CategoryModel(name= 'جنگ')
     model2 = CategoryModel(description='آثاری')

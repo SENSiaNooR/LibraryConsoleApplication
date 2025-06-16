@@ -47,19 +47,22 @@ register_adapter(LibrarianAction, adapt_enum)
 register_adapter(UserType, adapt_enum)
 
 # SQL Table Models
+class BaseTableModel:
+    pass
+
 
 @dataclass
-class AdminModel:
+class AdminModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
 
 @dataclass
-class AuthorModel:
+class AuthorModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     biography: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class BookModel:
+class BookModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     title: Union[str, None, UnsetType] = UNSET
     publisher_id: Union[int, None, UnsetType] = UNSET
@@ -67,17 +70,17 @@ class BookModel:
     available_copies: Union[int, None, UnsetType] = UNSET
 
 @dataclass
-class BookAuthorModel:
+class BookAuthorModel(BaseTableModel):
     book_id: Union[int, None, UnsetType] = UNSET
     author_id: Union[int, None, UnsetType] = UNSET
 
 @dataclass
-class BookCategoryModel:
+class BookCategoryModel(BaseTableModel):
     book_id: Union[int, None, UnsetType] = UNSET
     category_id: Union[int, None, UnsetType] = UNSET
 
 @dataclass
-class BorrowRequestModel:
+class BorrowRequestModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     member_id: Union[int, None, UnsetType] = UNSET
     book_id: Union[int, None, UnsetType] = UNSET
@@ -88,7 +91,7 @@ class BorrowRequestModel:
     note: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class BorrowingModel:
+class BorrowingModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     member_id: Union[int, None, UnsetType] = UNSET
     book_id: Union[int, None, UnsetType] = UNSET
@@ -97,24 +100,24 @@ class BorrowingModel:
     returned: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
-class CategoryModel:
+class CategoryModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     description: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class GuestModel:
+class GuestModel(BaseTableModel):
     id: Union[UUID, None, UnsetType] = UNSET
     created_time: Union[datetime, None, UnsetType] = UNSET
     request_count: Union[int, None, UnsetType] = UNSET
 
 @dataclass
-class LibrarianModel:
+class LibrarianModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class LibrarianActivityLogModel:
+class LibrarianActivityLogModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     librarian_id: Union[int, None, UnsetType] = UNSET
     action_type: Union[LibrarianAction, None, UnsetType] = UNSET
@@ -123,7 +126,7 @@ class LibrarianActivityLogModel:
     timestamp: Union[datetime, None, UnsetType] = UNSET
 
 @dataclass
-class MemberModel:
+class MemberModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     email: Union[str, None, UnsetType] = UNSET
@@ -131,7 +134,7 @@ class MemberModel:
     active: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
-class MessageModel:
+class MessageModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     user_id: Union[int, None, UnsetType] = UNSET
     message: Union[str, None, UnsetType] = UNSET
@@ -139,7 +142,7 @@ class MessageModel:
     seen: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
-class PublisherModel:
+class PublisherModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     address: Union[str, None, UnsetType] = UNSET
@@ -147,28 +150,30 @@ class PublisherModel:
     phone: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class UserModel:
+class UserModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
     hashed_password: Union[str, None, UnsetType] = UNSET
 
 # SQL View Models
+class BaseViewModel:
+    pass
 
 @dataclass
-class AdminVeiwModel:
+class AdminVeiwModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
     hashed_password: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class AuthorViewModel:
+class AuthorViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     books: Union[str, None, UnsetType] = UNSET
     biography: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class BookViewModel:
+class BookViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     title: Union[str, None, UnsetType] = UNSET
     publisher: Union[str, None, UnsetType] = UNSET
@@ -178,7 +183,7 @@ class BookViewModel:
     available_copies: Union[int, None, UnsetType] = UNSET
 
 @dataclass
-class BorrowingViewModel:
+class BorrowingViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     book: Union[str, None, UnsetType] = UNSET
@@ -187,14 +192,14 @@ class BorrowingViewModel:
     returned: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
-class CategoryViewModel:
+class CategoryViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     books: Union[str, None, UnsetType] = UNSET
     description: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class LibrarianActivityLogViewModel:
+class LibrarianActivityLogViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     librarian_name: Union[str, None, UnsetType] = UNSET
     action_type: Union[LibrarianAction, None, UnsetType] = UNSET
@@ -203,14 +208,14 @@ class LibrarianActivityLogViewModel:
     timestamp: Union[datetime, None, UnsetType] = UNSET
 
 @dataclass
-class LibrarianViewModel:
+class LibrarianViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
     hashed_password: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class MemberViewModel:
+class MemberViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
@@ -220,7 +225,7 @@ class MemberViewModel:
     active: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
-class MemberWithoutPasswordViewModel:
+class MemberWithoutPasswordViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
@@ -229,7 +234,7 @@ class MemberWithoutPasswordViewModel:
     active: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
-class MembersBorrowRequestViewModel:
+class MembersBorrowRequestViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     book: Union[str, None, UnsetType] = UNSET
@@ -240,7 +245,7 @@ class MembersBorrowRequestViewModel:
     note: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class MessageViewModel:
+class MessageViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     to: Union[str, None, UnsetType] = UNSET
     receiver_role: Union[UserType, None, UnsetType] = UNSET
@@ -249,7 +254,7 @@ class MessageViewModel:
     seen: Union[bool, None, UnsetType] = UNSET
 
 @dataclass
-class PublisherViewModel:
+class PublisherViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     address: Union[str, None, UnsetType] = UNSET
@@ -258,7 +263,7 @@ class PublisherViewModel:
     books: Union[str, None, UnsetType] = UNSET
 
 @dataclass
-class UserViewModel:
+class UserViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
     hashed_password: Union[str, None, UnsetType] = UNSET
@@ -266,7 +271,7 @@ class UserViewModel:
     user_type: Union[UserType, None, UnsetType] = UNSET
 
 @dataclass
-class UserWithoutPasswordViewModel:
+class UserWithoutPasswordViewModel(BaseViewModel):
     id: Union[int, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET

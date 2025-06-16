@@ -1,74 +1,70 @@
 ﻿from typing import Optional
-from DataAccess.BaseRepository import BaseRepository, map_to_model, map_to_single_model
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
+from DataAccess.Decorators import forbidden_method
 from Models.Models import PublisherModel, PublisherViewModel
-from Models.Schema import DBTables, DBViews
+from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 
 
-class PublisherRepository(BaseRepository):
+class PublisherRepository(CommonQueriesRepository):
     
-    @classmethod
-    @map_to_single_model(PublisherModel)
-    def get_publisher(cls, model : PublisherModel, cursor : Optional[PgCursor] = None) -> PublisherModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBTables.PUBLISHER,
-            cursor=cursor
-        )
-    
-    @classmethod
-    @map_to_single_model(PublisherViewModel)
-    def get_publisher_view(cls, model : PublisherViewModel, cursor : Optional[PgCursor] = None) -> PublisherViewModel:
-        return CommonQueriesRepository.get_record(
-            model=model,
-            table=DBViews.PUBLISHER_VIEW,
-            cursor=cursor
-        )
-       
-    @classmethod
-    @map_to_model(PublisherModel)
-    def get_publishers(cls, model : PublisherModel, cursor : Optional[PgCursor] = None) -> list[PublisherModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBTables.PUBLISHER,
-            cursor=cursor
-        )
-    
-    @classmethod
-    @map_to_model(PublisherViewModel)
-    def get_publishers_view(cls, model : PublisherViewModel, cursor : Optional[PgCursor] = None) -> list[PublisherViewModel]:
-        return CommonQueriesRepository.get_records(
-            model=model,
-            table=DBViews.PUBLISHER_VIEW,
-            cursor=cursor
-        )
+    table_name = DBTables.PUBLISHER
+    view_name = DBViews.PUBLISHER_VIEW
+    model_class = PublisherModel
+    view_model_class = PublisherViewModel
+    insert_clause_exclude = {
+        DBTableColumns.Publisher.ID    
+    }
+    set_clause_exclude = {
+        DBTableColumns.Publisher.ID    
+    }
+    where_clause_exclude = set()
+
+
+    # Inherited Methods
 
     @classmethod
-    @map_to_single_model(PublisherModel)
-    def add_publisher(cls, model : PublisherModel, cursor : Optional[PgCursor] = None) -> PublisherModel:
-        return CommonQueriesRepository.add_record(
-            model=model,
-            table=DBTables.PUBLISHER,
-            cursor=cursor
-        )
+    def get_one(cls, model : model_class, cursor : Optional[PgCursor] = None) -> Optional[model_class]:
+        return super().get_one(model, cursor)
+       
+    @classmethod
+    def get_many(cls, model : model_class, cursor : Optional[PgCursor] = None) -> list[model_class]:
+        return super().get_many(model, cursor)
     
     @classmethod
-    def update_publisher(cls, model: PublisherModel, cursor: Optional[PgCursor] = None) -> None:
-        return CommonQueriesRepository.update_record(
-            model=model,
-            table=DBTables.PUBLISHER,
-            cursor=cursor
-        )
+    def view_one(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> Optional[view_model_class]:
+        return super().view_one(model, cursor)
+       
+    @classmethod
+    def view_many(cls, model : view_model_class, cursor : Optional[PgCursor] = None) -> list[view_model_class]:
+        return super().view_many(model, cursor)
+    
+    @classmethod
+    def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
+        return super().add(model, cursor)
+    
+    @classmethod
+    def update(cls, model : model_class, cursor: Optional[PgCursor] = None) -> None:
+        return super().update(model, cursor)
             
     @classmethod
-    def delete_publisher(cls, id: int, cursor: Optional[PgCursor] = None) -> None:
-        return CommonQueriesRepository.delete_record(
-            id=id,
-            table=DBTables.PUBLISHER,
-            cursor=cursor
-        )
+    def delete(cls, id : int, cursor: Optional[PgCursor] = None) -> None:
+        return super().delete(id, cursor)
     
+
+    # Forbidden Methods
+    
+    @classmethod
+    @forbidden_method
+    def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        pass
+    
+    @classmethod
+    @forbidden_method
+    def clear(cls, cursor: Optional[PgCursor] = None):
+        pass
+    
+
 if __name__ == '__main__':
     
     model1 = PublisherModel(phone = '071-32223344')
