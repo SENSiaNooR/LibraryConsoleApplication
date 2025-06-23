@@ -60,7 +60,11 @@
     <Compile Include="Services\MemberServices.py" />
     <Compile Include="Services\__init__.py" />
     <Compile Include="Core\Validations.py" />
+<<<<<<< HEAD
     <Compile Include="Tests\TestAuthorRepository.py" />
+=======
+    <Compile Include="tests\test_author_repository.py" />
+>>>>>>> 494f50ab522d474d79e55163f40e7dba0c3e5897
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
@@ -84,7 +88,11 @@
     <Folder Include="Models\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Core\" />
+<<<<<<< HEAD
     <Folder Include="Tests\" />
+=======
+    <Folder Include="tests\" />
+>>>>>>> 494f50ab522d474d79e55163f40e7dba0c3e5897
     <Folder Include="Presentation\" />
     <Folder Include="Presentation\ConsoleUI\" />
     <Folder Include="Presentation\WebUI\" />
