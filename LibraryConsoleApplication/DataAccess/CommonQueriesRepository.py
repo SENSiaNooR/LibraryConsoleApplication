@@ -1,6 +1,5 @@
-from ipaddress import _BaseV4
 from typing import Optional
-from DataAccess.BaseRepository import BaseRepository, map_to_single_model
+from DataAccess.BaseRepository import BaseRepository
 from Exceptions.Exceptions import MultipleRowsReturnedError
 from psycopg2.extensions import cursor as PgCursor
 from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause

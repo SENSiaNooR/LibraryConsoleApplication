@@ -1,4 +1,4 @@
-﻿from Connection import DatabaseConnector
+﻿from DataAccess.Connection import DatabaseConnector
 from psycopg2.extensions import connection as PgConnection, cursor as PgCursor
 from typing import Optional, Type
 from abc import ABC

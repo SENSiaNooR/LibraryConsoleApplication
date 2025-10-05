@@ -70,12 +70,18 @@ class AuthorRepository(CommonQueriesRepository):
 
 if __name__ == '__main__':
     
-    model = AuthorModel(name = 'رها جهانشاهی', biography='یه نویسنده پر تلاش')
+
+    model = AuthorModel(name = 'پریناز جهانشاهی', biography='یه نویسنده پر تلاش')
     
-    AuthorRepository.add(model)
+    cursor = AuthorRepository._get_cursor()
+
+    AuthorRepository.add(model, cursor)
     
-    res1 = AuthorRepository.get_many(AuthorModel())
+    res1 = AuthorRepository.get_many(AuthorModel(), cursor)
     print('[')
     for row in res1:
         print(f'\t{row}')
     print(']')
+    
+    cursor.connection.rollback()
+    cursor.connection.close()
