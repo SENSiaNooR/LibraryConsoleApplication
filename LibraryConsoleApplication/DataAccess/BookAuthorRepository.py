@@ -1,7 +1,7 @@
 from typing import Optional
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from DataAccess.Decorators import forbidden_method
-from Models.Models import AuthorModel
+from Models.Models import BookAuthorModel
 from Models.Schema import DBTables
 from psycopg2.extensions import cursor as PgCursor
 
@@ -9,7 +9,7 @@ from psycopg2.extensions import cursor as PgCursor
 class BookAuthorRepository(CommonQueriesRepository):
     
     table_name = DBTables.BOOK_AUTHOR
-    model_class = AuthorModel
+    model_class = BookAuthorModel
     insert_clause_exclude = set()
     set_clause_exclude = set()
     where_clause_exclude = set()
