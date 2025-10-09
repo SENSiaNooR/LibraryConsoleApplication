@@ -110,26 +110,31 @@ class GuestRepository(CommonQueriesRepository):
     @classmethod
     @forbidden_method
     def get_many(cls, model, cursor : Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
     
     @classmethod
     @forbidden_method
     def view_one(cls, model, cursor : Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
        
     @classmethod
     @forbidden_method
     def view_many(cls, model, cursor : Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
     
     @classmethod
     @forbidden_method
     def update(cls, model, cursor: Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
    
     @classmethod
     @forbidden_method
     def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
 
             

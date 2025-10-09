@@ -30,36 +30,43 @@ class BookAuthorRepository(CommonQueriesRepository):
     @classmethod
     @forbidden_method
     def get_one(cls, model, cursor : Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
        
     @classmethod
     @forbidden_method
     def get_many(cls, model, cursor : Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
     
     @classmethod
     @forbidden_method
     def view_one(cls, model, cursor : Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
        
     @classmethod
     @forbidden_method
     def view_many(cls, model, cursor : Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
     
     @classmethod
     @forbidden_method
     def update(cls, model, cursor: Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
             
     @classmethod
     @forbidden_method
     def delete(cls, id, cursor: Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
     
     @classmethod
     @forbidden_method
     def clear(cls, cursor: Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
 
 

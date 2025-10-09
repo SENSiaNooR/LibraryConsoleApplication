@@ -56,11 +56,13 @@ class AuthorRepository(CommonQueriesRepository):
     @classmethod
     @forbidden_method
     def remove(cls, model, use_like_for_strings : bool = True, cursor: Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
     
     @classmethod
     @forbidden_method
     def clear(cls, cursor: Optional[PgCursor] = None):
+        """Disabled method. Not allowed for this repository."""
         pass
     
 
