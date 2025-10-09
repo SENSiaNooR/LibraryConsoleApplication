@@ -30,7 +30,33 @@ class MemberRepository(CommonQueriesRepository):
     
     @classmethod
     def add(cls, plain_user_model : PlainUserModel, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
-        
+        """
+        Adds a new member to the database along with creating the associated user account.
+
+        This method first creates a new user record by calling
+        `UserRepository.hash_password_and_add_user()` with the provided
+        plain user credentials (`PlainUserModel`).  
+        The generated user ID is then assigned to the member model, and the member is added
+        to the database with the current join date.
+
+        Args:
+            plain_user_model (PlainUserModel):
+                Plain-text user credentials for the member, including `username` and `password`.
+            model (model_class):
+                The member model instance containing member-specific attributes.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If omitted, a new cursor and connection are created automatically.
+
+        Returns:
+            model_class:
+                The newly added member record with assigned user ID and join date.
+
+        Raises:
+            DatabaseError:
+                If any database operation fails.
+            IntegrityError:
+                If a user with the same username already exists.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -53,12 +79,48 @@ class MemberRepository(CommonQueriesRepository):
 
     @classmethod
     def update(cls, model : model_class, cursor: Optional[PgCursor] = None) -> None:
+        """
+        Updates an existing member record in the database, excluding the `active` field.
+
+        This override ensures that the `active` status of a member cannot be directly
+        modified using this method. Instead, member activation or deactivation must be
+        performed via `activate_member()` or `deactivate_member()`.
+
+        Args:
+            model (model_class):
+                The member model containing updated data.
+            cursor (Optional[PgCursor], optional):
+                Database cursor for executing the update. If omitted, a new one is created automatically.
+        """
         model.active = UnsetType()
         return super().update(model, cursor)
     
     @classmethod
     def _active_or_deactive_member(cls, model : model_class, active : bool, cursor : Optional[PgCursor] = None) -> None:
-        
+        """
+        Internal helper method to activate or deactivate a member.
+
+        This method checks the current activation status of the member and toggles it
+        according to the given `active` flag. If the member is already in the desired state,
+        a specific exception (`MemberAlreadyActivatedError` or `MemberAlreadyDeactivatedError`)
+        is raised.
+
+        Args:
+            model (model_class):
+                The member model instance containing the member's ID.
+            active (bool):
+                Desired activation state. `True` for activation, `False` for deactivation.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one is created automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError:
+                If the specified member record is not found.
+            MemberAlreadyActivatedError:
+                If the member is already active and activation is requested.
+            MemberAlreadyDeactivatedError:
+                If the member is already inactive and deactivation is requested.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -88,10 +150,44 @@ class MemberRepository(CommonQueriesRepository):
             
     @classmethod
     def deactivate_member(cls, model : model_class, cursor : Optional[PgCursor] = None) -> None:
+        """
+        Deactivates a member account.
+
+        This method marks the specified member as inactive.
+
+        Args:
+            model (model_class):
+                The member model identifying which member to deactivate.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one is created automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError:
+                If the member record does not exist.
+            MemberAlreadyDeactivatedError:
+                If the member is already inactive.
+        """
         return cls._active_or_deactive_member(model, active=False, cursor=cursor)
 
     @classmethod
     def activate_member(cls, model : model_class, cursor : Optional[PgCursor] = None):
+        """
+        Activates a previously deactivated member account.
+
+        This method marks the specified member as active.
+
+        Args:
+            model (model_class):
+                The member model identifying which member to activate.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one is created automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError:
+                If the member record does not exist.
+            MemberAlreadyActivatedError:
+                If the member is already active.
+        """
         return cls._active_or_deactive_member(model, active=True, cursor=cursor)
     
 
@@ -155,9 +251,3 @@ if __name__ == '__main__':
     MemberRepository.update_member(res1)
     
     MemberRepository.deactivate_member(MemberWithoutPasswordViewModel(name = 'رضا پلنگ'))
-    
-    res3 = MemberRepository.get_members_without_password(MemberWithoutPasswordViewModel())
-    print('res3 = [')
-    for row in res3:
-        print(f'\t{row}')
-    print(']\n')

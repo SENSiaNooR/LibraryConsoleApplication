@@ -24,7 +24,40 @@ class LibrarianRepository(CommonQueriesRepository):
         
     @classmethod
     def add(cls, plain_user_model : PlainUserModel, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
-        
+        """
+        Adds a new librarian to the database, creating its corresponding user record first.
+
+        This method first creates a new user in the `users` table using the provided
+        `PlainUserModel`, where the password is securely hashed via
+        `UserRepository.hash_password_and_add_user()`.  
+        After the user is successfully added, the resulting user ID is assigned to the
+        librarian model (`model.id`), and the librarian record is inserted into the database.
+
+        The operation may automatically handle database connection and commit if a cursor
+        is not provided.
+
+        Args:
+            plain_user_model (PlainUserModel):
+                The plain-text user credentials for the librarian, containing
+                `username` and `password` before hashing.
+            model (model_class):
+                The librarian model instance containing librarian-specific fields.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new cursor and connection
+                are created automatically.
+
+        Returns:
+            model_class:
+                The newly added librarian model instance with an assigned user ID.
+
+        Raises:
+            DatabaseError:
+                If any database operation fails.
+            IntegrityError:
+                If a user with the same username already exists.
+            ValueError:
+                If required fields are missing or invalid.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()

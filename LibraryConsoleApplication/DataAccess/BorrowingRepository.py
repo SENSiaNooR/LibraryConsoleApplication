@@ -32,7 +32,37 @@ class BorrowingRepository(CommonQueriesRepository):
 
     @classmethod
     def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
-        
+        """
+        Adds a new borrowing record and updates the related book availability.
+
+        This method registers a new borrowing event in the database. It checks whether 
+        the requested book exists and has available copies before creating the borrowing 
+        record. Once the record is added, it decreases the book’s `available_copies` count 
+        by one.
+
+        If no database cursor is provided, the method opens a new connection, performs 
+        the operation, commits the transaction, and closes the connection automatically.
+
+        Workflow:
+            1. Verify that the referenced book exists.
+            2. Check that at least one copy of the book is available.
+            3. Set borrowing metadata (start date, end date, returned flag).
+            4. Insert a new borrowing record into the database.
+            5. Decrease the book’s available copies.
+            6. Commit and close the connection (if opened internally).
+
+        Args:
+            model (BorrowingModel): The borrowing record to be inserted into the database.
+            cursor (Optional[PgCursor], optional): Database cursor to use. 
+                If not provided, a new connection will be created automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError: If the referenced book does not exist.
+            BookOutOfStockError: If there are no available copies of the requested book.
+
+        Returns:
+            BorrowingModel: The newly added borrowing record, as stored in the database.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -66,7 +96,36 @@ class BorrowingRepository(CommonQueriesRepository):
 
     @classmethod
     def return_book(cls, model : BorrowingModel, cursor : Optional[PgCursor] = None) -> None:
-        
+        """
+        Marks a borrowed book as returned and updates the related book record.
+
+        This method finalizes the borrowing process by setting the `returned` field of 
+        the borrowing record to `True` and assigning the current timestamp as the 
+        `end_date`. It then increments the `available_copies` count of the corresponding 
+        book in the `BookRepository`.
+
+        If no database cursor is provided, the method opens a new connection and commits 
+        the changes automatically before closing it.
+
+        Workflow:
+            1. Fetch the borrowing record from the database.
+            2. Validate that the record exists and has not already been returned.
+            3. Mark the record as returned and update the return date.
+            4. Update the related book’s available copies.
+            5. Commit and close the connection (if it was opened internally).
+
+        Args:
+            model (BorrowingModel): The borrowing record to be marked as returned.
+            cursor (Optional[PgCursor], optional): Database cursor to use. 
+                If not provided, a new connection will be created automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError: If the borrowing record does not exist.
+            AlreadyReturnedBookError: If the book was already marked as returned.
+
+        Returns:
+            None
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()

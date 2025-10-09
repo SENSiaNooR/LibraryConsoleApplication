@@ -35,7 +35,39 @@ class BorrowRequestRepository(CommonQueriesRepository):
     
     @classmethod
     def add(cls, model : model_class, cursor : Optional[PgCursor] = None) -> model_class:
-        
+        """
+        Adds a new borrow request record after validating member and book conditions.
+
+        This method registers a new borrow request in the database. It ensures that:
+        - The requesting member exists and is active.
+        - The requested book exists and has at least one available copy.
+    
+        The method then assigns the current timestamp as the request time and 
+        sets the request status to `pending` before inserting the record into the database.
+
+        If no database cursor is provided, a new connection will be created, 
+        and the transaction will be committed and closed automatically.
+
+        Workflow:
+            1. Fetch and validate the member and book records.
+            2. Ensure the member is active and the book is available.
+            3. Assign metadata (request timestamp, status = pending).
+            4. Insert the borrow request record into the database.
+            5. Commit and close the connection (if opened internally).
+
+        Args:
+            model (BorrowRequestModel): The borrow request record to insert.
+            cursor (Optional[PgCursor], optional): Database cursor to use.
+                If not provided, a new connection will be opened automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError: If the referenced member or book does not exist.
+            InactiveMemberBorrowRequestError: If the requesting member is inactive.
+            BookOutOfStockError: If the requested book has no available copies.
+
+        Returns:
+            BorrowRequestModel: The newly inserted borrow request record.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -75,7 +107,34 @@ class BorrowRequestRepository(CommonQueriesRepository):
     
     @classmethod
     def update(cls, model : model_class, cursor: Optional[PgCursor] = None) -> None:
-        
+        """
+        Updates the status of a borrow request after validating its current state.
+
+        This method allows changing the status of a borrow request to either 
+        `accepted` or `rejected`. It performs the following validations:
+          - The borrow request exists in the database.
+          - The request is currently in `pending` status.
+          - The new status is either `accepted` or `rejected`.
+
+        Upon successful validation, it sets the `handled_at` timestamp to the 
+        current datetime and updates the record in the database.
+
+        If no cursor is provided, the method will open a new database connection,
+        commit the transaction, and close it automatically.
+
+        Args:
+            model (BorrowRequestModel): The borrow request model containing the updated status.
+            cursor (Optional[PgCursor], optional): Database cursor to use. 
+                If not provided, a new connection will be created automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError: If the borrow request does not exist.
+            BorrowRequestAlreadyHandledError: If the request status is not `pending`.
+            ValueError: If the new status is not `accepted` or `rejected`.
+
+        Returns:
+            None
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()

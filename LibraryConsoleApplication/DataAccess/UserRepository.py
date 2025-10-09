@@ -29,7 +29,31 @@ class UserRepository(CommonQueriesRepository):
     
     @classmethod
     def verify_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> bool:
-        
+        """
+        Verifies a user's credentials by comparing the provided plain password with the stored hash.
+
+        This method retrieves the user record from the database using the provided username,
+        then verifies whether the given plain-text password matches the stored hashed password.
+        It is typically used during the login process.
+
+        Args:
+            plain_user_model (PlainUserModel):
+                The plain user data containing the username and password to verify.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one will be created automatically.
+
+        Returns:
+            bool:
+                True if the provided credentials are valid; False otherwise.
+
+        Raises:
+            ValueError:
+                If the username or password is not a string.
+            NotSuchModelInDataBaseError:
+                If the user with the specified username does not exist in the database.
+            DatabaseError:
+                If any database operation fails.
+        """
         if (not isinstance(plain_user_model.username, str)) or (not isinstance(plain_user_model.password, str)):
             raise ValueError('username and password must be string')
 
@@ -56,6 +80,31 @@ class UserRepository(CommonQueriesRepository):
 
     @classmethod
     def hash_password_and_add_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> UserModel:
+        """
+        Hashes a user's plain-text password and adds the new user to the database.
+
+        This method takes a plain user model containing a raw (unhashed) password,
+        hashes it securely using the `PasswordManager`, and creates a new `UserModel`
+        record with the hashed password.  
+        It is used internally by repositories (e.g., `LibrarianRepository`, `MemberRepository`)
+        when creating new user accounts.
+
+        Args:
+            plain_user_model (PlainUserModel):
+                The plain user data containing the username and raw password.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one will be created automatically.
+
+        Returns:
+            UserModel:
+                The created user model containing the hashed password, suitable for storage in the database.
+
+        Raises:
+            ValueError:
+                If the username or password is not a string.
+            DatabaseError:
+                If the insert operation fails.
+        """
         if (not isinstance(plain_user_model.username, str)) or (not isinstance(plain_user_model.password, str)):
             raise ValueError('username and password must be string')
         
@@ -69,7 +118,27 @@ class UserRepository(CommonQueriesRepository):
 
     @classmethod
     def change_password(cls, plain_user_model : PlainUserModel, new_password : str, cursor : Optional[PgCursor] = None) -> None:
-        
+        """
+        Change the password of a user after verifying their current credentials.
+
+        The user must provide a valid username and current password to confirm identity.
+        After successful verification, the password is securely re-hashed and updated in the database.
+
+        Args:
+            plain_user_model (PlainUserModel): 
+                A model containing the user's current username and password.
+            new_password (str): 
+                The new password to be set for the user.
+            cursor (Optional[PgCursor], optional): 
+                An existing PostgreSQL cursor for transactional use. 
+                If not provided, a new one will be created and committed automatically.
+
+        Raises:
+            AuthenticationFailed: If the provided username or password is incorrect.
+
+        Returns:
+            None
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -99,6 +168,29 @@ class UserRepository(CommonQueriesRepository):
 
     @classmethod
     def _change_password_by_role(cls, username: str, new_password: str, user_type: UserType, cursor: Optional[PgCursor] = None) -> None:
+        """
+        Change a user's password based on their role (used internally by admin or librarian operations).
+
+        This method bypasses direct credential verification and allows role-authorized
+        password resets. It is mainly used by higher-privilege users (e.g., Admin for librarians,
+        Librarian for members).
+
+        Args:
+            username (str): 
+                Username of the target user.
+            new_password (str): 
+                The new password to assign.
+            user_type (UserType): 
+                The role of the user whose password is being changed.
+            cursor (Optional[PgCursor], optional): 
+                An existing PostgreSQL cursor. If not provided, a new one will be created.
+
+        Raises:
+            NotSuchModelInDataBaseError: If the specified user does not exist in the database.
+
+        Returns:
+            None
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -126,15 +218,63 @@ class UserRepository(CommonQueriesRepository):
         
     @classmethod
     def change_member_password(cls, username: str, new_password: str, cursor: Optional[PgCursor] = None) -> None:
+        """
+        Change a member's password (used by librarians).
+
+        This method allows a librarian to reset a member’s password without requiring the old one.
+        Internally delegates to `_change_password_by_role`.
+
+        Args:
+            username (str): Username of the member.
+            new_password (str): New password to assign.
+            cursor (Optional[PgCursor], optional): Database cursor for transactional use.
+
+        Returns:
+            None
+        """
         cls._change_password_by_role(username, new_password, UserType.member, cursor)
 
     @classmethod
     def change_librarian_password(cls, username: str, new_password: str, cursor: Optional[PgCursor] = None) -> None:
+        """
+        Change a librarian's password (used by administrators).
+
+        Allows an admin to reset a librarian’s password without requiring old credentials.
+        Internally uses `_change_password_by_role`.
+
+        Args:
+            username (str): Username of the librarian.
+            new_password (str): New password to assign.
+            cursor (Optional[PgCursor], optional): Database cursor for transactional use.
+
+        Returns:
+            None
+        """
         cls._change_password_by_role(username, new_password, UserType.librarian, cursor)
     
     @classmethod
     def change_username(cls, plain_user_model : PlainUserModel, new_username : str, cursor : Optional[PgCursor] = None) -> None:
-        
+        """
+        Change a user's username after verifying their current credentials.
+
+        The user must authenticate with their existing username and password before changing it.
+        The change is then persisted in the database.
+
+        Args:
+            plain_user_model (PlainUserModel): 
+                The current username and password of the user.
+            new_username (str): 
+                The desired new username.
+            cursor (Optional[PgCursor], optional): 
+                Database cursor for transactional use. 
+                If not provided, a new cursor will be created and committed automatically.
+
+        Raises:
+            AuthenticationFailed: If the current username or password is invalid.
+
+        Returns:
+            None
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()

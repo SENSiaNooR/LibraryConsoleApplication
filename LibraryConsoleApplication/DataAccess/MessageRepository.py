@@ -41,7 +41,25 @@ class MessageRepository(CommonQueriesRepository):
     
     @classmethod
     def _update_seen(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> None:
-        
+        """
+        Marks all messages for a specific user as seen.
+
+        This internal method updates the `seen` status of all messages
+        belonging to the given user to `True`.  
+        It is typically called after retrieving messages from a user's inbox.
+
+        Args:
+            user_model (UserModel):
+                The user whose messages should be marked as seen.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one will be created automatically.
+
+        Raises:
+            NotSuchModelInDataBaseError:
+                If the specified user record cannot be found in the database.
+            DatabaseError:
+                If the update operation fails.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -67,7 +85,29 @@ class MessageRepository(CommonQueriesRepository):
     @classmethod
     @map_to_model(MessageViewModel)
     def inbox(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> list[MessageViewModel]:
-        
+        """
+        Retrieves all messages received by the specified user and marks them as seen.
+
+        This method fetches all messages where the recipient matches the given user's username.
+        The returned messages are mapped to `MessageViewModel` instances.  
+        After fetching, all retrieved messages are automatically marked as seen.
+
+        Args:
+            user_model (UserModel):
+                The user whose inbox messages are being retrieved.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one will be created automatically.
+
+        Returns:
+            list[MessageViewModel]:
+                A list of message view models representing the user's inbox.
+
+        Raises:
+            NotSuchModelInDataBaseError:
+                If the specified user record cannot be found in the database.
+            DatabaseError:
+                If the query or update operation fails.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
@@ -93,7 +133,29 @@ class MessageRepository(CommonQueriesRepository):
     @classmethod
     @map_to_model(MessageViewModel)
     def unread_inbox(cls, user_model: UserModel, cursor: Optional[PgCursor] = None) -> list[MessageViewModel]:
-        
+        """
+        Retrieves only unread messages for the specified user and marks them as seen.
+
+        This method fetches all messages addressed to the given user
+        that have not yet been marked as seen (`seen = False`).  
+        After retrieving the messages, it automatically updates their `seen` status to `True`.
+
+        Args:
+            user_model (UserModel):
+                The user whose unread messages are being retrieved.
+            cursor (Optional[PgCursor], optional):
+                Existing database cursor. If not provided, a new one will be created automatically.
+
+        Returns:
+            list[MessageViewModel]:
+                A list of message view models for unread messages.
+
+        Raises:
+            NotSuchModelInDataBaseError:
+                If the specified user record cannot be found in the database.
+            DatabaseError:
+                If the query or update operation fails.
+        """
         commit_and_close = False
         if cursor is None:
             cursor = cls._get_cursor()
