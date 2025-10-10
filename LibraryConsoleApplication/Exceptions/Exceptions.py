@@ -7,6 +7,10 @@ class NotSuchModelInDataBaseError(Exception):
         super().__init__(message)
         self.model = model
 
+class EmptyModelError(ValueError):
+    """Raised when attempting to query or update using an empty model."""
+    def __init__(self, message: str = "Model has no populated fields for building a WHERE clause."):
+        super().__init__(message)
 
 class MultipleRowsReturnedError(Exception):
     """Raised when more than one row is returned in a single-row query."""

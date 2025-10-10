@@ -301,6 +301,23 @@ class UserModel(BaseTableModel):
     id: Union[int, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
     hashed_password: Union[str, None, UnsetType] = UNSET
+    
+@dataclass
+class TestingModel(BaseTableModel):
+    """
+    Test model for testing. Not actual representation of main application tables.
+
+    Attributes:
+        id (int | None | UnsetType) 
+        name (str | None | UnsetType) 
+        age (int | None | UnsetType)
+        description (str | None | UnsetType) 
+    """
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    age: Union[int, None, UnsetType] = UNSET
+    description: Union[str, None, UnsetType] = UNSET
+
 
 # SQL View Models
 class BaseViewModel:
@@ -582,6 +599,22 @@ class UserWithoutPasswordViewModel(BaseViewModel):
     username: Union[str, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     user_type: Union[UserType, None, UnsetType] = UNSET
+    
+@dataclass
+class TestingViewModel(BaseViewModel):
+    """
+    Represents a view of Test model for testing. Not actual representation of main application views.
+
+    Attributes:
+        id (int | None | UnsetType) 
+        name (str | None | UnsetType) 
+        age (int | None | UnsetType)
+        description (str | None | UnsetType) 
+    """
+    id: Union[int, None, UnsetType] = UNSET
+    name: Union[str, None, UnsetType] = UNSET
+    age: Union[int, None, UnsetType] = UNSET
+    description: Union[str, None, UnsetType] = UNSET
     
 # Other Models
 

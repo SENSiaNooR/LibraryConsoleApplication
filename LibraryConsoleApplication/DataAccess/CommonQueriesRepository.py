@@ -1,6 +1,6 @@
 ﻿from typing import Optional
 from DataAccess.BaseRepository import BaseRepository
-from Exceptions.Exceptions import MultipleRowsReturnedError
+from Exceptions.Exceptions import EmptyModelError, MultipleRowsReturnedError
 from psycopg2.extensions import cursor as PgCursor
 from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause
 from Models.Models import BaseTableModel, BaseViewModel
@@ -36,6 +36,9 @@ class CommonQueriesRepository(BaseRepository):
 
         Returns:
             Optional[BaseTableModel]: The matching record as a model instance, or None if not found.
+
+        Raises:
+            EmptyModelError: Raise when attempting to search by an empty model.
         """
         commit_and_close = False
         if cursor is None:
@@ -43,6 +46,9 @@ class CommonQueriesRepository(BaseRepository):
             commit_and_close = True
         
         where_clause, values = build_where_clause(model, exclude=cls.where_clause_exclude)
+
+        if not where_clause:
+            raise EmptyModelError()
 
         query = (
             f"""
@@ -88,7 +94,8 @@ class CommonQueriesRepository(BaseRepository):
         if not where_clause:
             query = (
                 f"""
-                SELECT * FROM {cls.table_name} 
+                SELECT * FROM {cls.table_name}
+                LIMIT {cls.return_limit}
                 """
             )
             cursor.execute(query)
@@ -98,6 +105,7 @@ class CommonQueriesRepository(BaseRepository):
                 f"""
                 SELECT * FROM {cls.table_name}
                 WHERE {where_clause}
+                LIMIT {cls.return_limit}
                 """
             )
             cursor.execute(query, values)
@@ -127,6 +135,9 @@ class CommonQueriesRepository(BaseRepository):
             commit_and_close = True
         
         where_clause, values = build_where_clause(model, exclude=cls.where_clause_exclude)
+
+        if not where_clause:
+            raise EmptyModelError()
 
         query = (
             f"""
@@ -173,6 +184,7 @@ class CommonQueriesRepository(BaseRepository):
             query = (
                 f"""
                 SELECT * FROM {cls.view_name} 
+                LIMIT {cls.return_limit}
                 """
             )
             cursor.execute(query)
@@ -182,6 +194,7 @@ class CommonQueriesRepository(BaseRepository):
                 f"""
                 SELECT * FROM {cls.view_name}
                 WHERE {where_clause}
+                LIMIT {cls.return_limit}
                 """
             )
             cursor.execute(query, values)
@@ -204,6 +217,9 @@ class CommonQueriesRepository(BaseRepository):
 
         Returns:
             BaseTableModel: Model instance representing the inserted record (possibly with generated fields like ID).
+        
+        Raises:
+            EmptyModelError: Raise when attempting to add an empty model.    
         """
         commit_and_close = False
         if cursor is None:
@@ -211,6 +227,9 @@ class CommonQueriesRepository(BaseRepository):
             commit_and_close = True
 
         columns_clause, placeholders_clause, values = build_insert_clause(model, exclude=cls.insert_clause_exclude)
+
+        if not columns_clause:
+            raise EmptyModelError()
 
         query = (
             f"""
@@ -297,6 +316,9 @@ class CommonQueriesRepository(BaseRepository):
             model (BaseTableModel): Model instance containing filter fields.
             use_like_for_strings (bool): Whether to use SQL LIKE for string comparisons (default True).
             cursor (Optional[PgCursor]): Optional database cursor.
+            
+        Raises:
+            EmptyModelError: Raise when attempting to filter removing records by an empty model. Use clear() method instead.
         """
         commit_and_close = False
         if cursor is None:
@@ -304,6 +326,9 @@ class CommonQueriesRepository(BaseRepository):
             commit_and_close = True
 
         where_clause, values = build_where_clause(model, use_like_for_strings, cls.where_clause_exclude)
+
+        if not where_clause:
+            raise EmptyModelError()
 
         query = f"""
             DELETE FROM {cls.table_name}
@@ -359,6 +384,9 @@ class CommonQueriesRepository(BaseRepository):
         
         where_clause, values = build_where_clause(model, exclude=exclude)
 
+        if not where_clause:
+            raise EmptyModelError()
+
         query = (
             f"""
             SELECT * FROM {table} 
@@ -403,6 +431,7 @@ class CommonQueriesRepository(BaseRepository):
             query = (
                 f"""
                 SELECT * FROM {table} 
+                LIMIT {cls.return_limit}
                 """
             )
             cursor.execute(query)
@@ -412,6 +441,7 @@ class CommonQueriesRepository(BaseRepository):
                 f"""
                 SELECT * FROM {table}
                 WHERE {where_clause}
+                LIMIT {cls.return_limit}
                 """
             )
             cursor.execute(query, values)
@@ -443,6 +473,9 @@ class CommonQueriesRepository(BaseRepository):
             commit_and_close = True
 
         columns_clause, placeholders_clause, values = build_insert_clause(model, exclude)
+
+        if not columns_clause:
+            raise EmptyModelError()
 
         query = (
             f"""
@@ -540,6 +573,9 @@ class CommonQueriesRepository(BaseRepository):
             commit_and_close = True
 
         where_clause, values = build_where_clause(model, use_like_for_strings)
+        
+        if not where_clause:
+            raise EmptyModelError()
 
         query = f"""
             DELETE FROM {table}

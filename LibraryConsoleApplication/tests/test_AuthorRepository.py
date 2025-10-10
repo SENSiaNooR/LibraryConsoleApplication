@@ -1,6 +1,5 @@
 ﻿from DataAccess.AuthorRepository import AuthorRepository
 import unittest
-import Exceptions
 from Exceptions.Exceptions import RepositoryMethodNotAllowedError
 
 from Models.Models import AuthorModel
@@ -15,13 +14,18 @@ class TestAuthorRepository(unittest.TestCase):
         self.cursor.connection.rollback()
         self.cursor.connection.close()
         
+    def rollback(self) -> None:
+        self.cursor.connection.rollback()
+        
+    # ─────────────────────────────── Tests ───────────────────────────────
+        
     def test_forbidden_methods(self):
         model = AuthorModel(name = 'احمد')
         
-        with self.assertRaises(RepositoryMethodNotAllowedError, AuthorRepository.remove(model, cursor = self.cursor)):
-            pass 
-        with self.assertRaises(RepositoryMethodNotAllowedError, AuthorRepository.clear(cursor = self.cursor)):
-            pass   
+        with self.assertRaises(RepositoryMethodNotAllowedError):
+            AuthorRepository.remove(model, cursor = self.cursor)
+        with self.assertRaises(RepositoryMethodNotAllowedError):
+            AuthorRepository.clear(cursor = self.cursor)
         
     def test_get_one(self):
         model = AuthorModel(name = 'احمد شاملو')
@@ -37,7 +41,4 @@ class TestAuthorRepository(unittest.TestCase):
         self.assertEqual(db_model, expected_model)
 
 
-
-if __name__ == '__main__':
-    unittest.main()
         

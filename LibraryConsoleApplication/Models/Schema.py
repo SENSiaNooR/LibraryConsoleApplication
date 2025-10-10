@@ -20,6 +20,7 @@ class DBTables:
     MESSAGE = '"Message"'
     PUBLISHER = '"Publisher"'
     USER = '"User"'
+    TESTING = '"Testing"'
 
 class DBViews:
     ADMIN_VIEW = '"AdminView"'
@@ -36,6 +37,7 @@ class DBViews:
     PUBLISHER_VIEW = '"PublisherView"'
     USER_VIEW = '"UserView"'
     USER_WITHOUT_PASSWORD_VIEW = '"UserWithoutPasswordView"'
+    TESTING_VIEW = '"TestingView"'
 
 class DBTableColumns:
     class Admin:
@@ -126,6 +128,12 @@ class DBTableColumns:
         ID = "id"
         USERNAME = "username"
         HASHED_PASSWORD = "hashed_password"
+        
+    class Testing:
+        ID = "id"
+        NAME = "name"
+        AGE = "age"
+        DESCRIPTION = "description"
 
 
 class DBViewColumns:
@@ -232,4 +240,10 @@ class DBViewColumns:
         ID = "id"
         USERNAME = "username"
         NAME = "name"
-        USER_TYPE = "user_type"       
+        USER_TYPE = "user_type" 
+        
+    class TestingView:
+        ID = "id"
+        NAME = "name"
+        AGE = "age"
+        DESCRIPTION = "description"

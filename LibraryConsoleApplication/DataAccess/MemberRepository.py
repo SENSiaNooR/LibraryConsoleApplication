@@ -246,8 +246,3 @@ if __name__ == '__main__':
     
     res2 = UserRepository.verify_user(p1)
     print(f'res2 = {res2}\n')
-    
-    res1.email = 'rezapalang2@gmail.com'
-    MemberRepository.update_member(res1)
-    
-    MemberRepository.deactivate_member(MemberWithoutPasswordViewModel(name = 'رضا پلنگ'))

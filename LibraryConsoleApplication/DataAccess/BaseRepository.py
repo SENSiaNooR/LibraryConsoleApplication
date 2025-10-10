@@ -22,6 +22,7 @@ class BaseRepository(ABC):
         insert_clause_exclude (Set[str]): Columns that cannot be specified in INSERT queries.
         set_clause_exclude (Set[str]): Columns that cannot be specified in UPDATE queries.
         where_clause_exclude (Set[str]): Columns that cannot be specified in WHERE (filtering) queries.
+        return_limit (int): Specifies the maximum number of records that can be returned in query results.
     """
     
     _db = DatabaseConnector()
@@ -33,6 +34,7 @@ class BaseRepository(ABC):
     insert_clause_exclude : set = {'id'}
     set_clause_exclude : set = {'id'}
     where_clause_exclude : set = set()
+    return_limit : int = 100
 
     @classmethod
     def _get_connection(cls) -> PgConnection:

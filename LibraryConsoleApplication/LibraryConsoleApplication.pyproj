@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>DataAccess\AuthorRepository.py</StartupFile>
+    <StartupFile>Tests\TestAuthorRepository.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -34,6 +34,7 @@
     <Compile Include="DataAccess\CommonQueriesRepository.py" />
     <Compile Include="DataAccess\Connection.py" />
     <Compile Include="DataAccess\Decorators.py" />
+    <Compile Include="DataAccess\TestingRepository.py" />
     <Compile Include="Exceptions\Exceptions.py" />
     <Compile Include="DataAccess\GuestRepository.py" />
     <Compile Include="DataAccess\LibrarianActivityLogRepository.py" />
@@ -61,7 +62,8 @@
     <Compile Include="Services\MemberServices.py" />
     <Compile Include="Services\__init__.py" />
     <Compile Include="Core\Validations.py" />
-    <Compile Include="Tests\TestAuthorRepository.py" />
+    <Compile Include="Tests\test_AuthorRepository.py" />
+    <Compile Include="Tests\test_CommonQueries.py" />
     <Compile Include="Tests\__init__.py" />
   </ItemGroup>
   <ItemGroup>
