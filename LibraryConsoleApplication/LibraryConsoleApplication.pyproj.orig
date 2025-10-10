@@ -1,0 +1,122 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>Tests\TestAuthorRepository.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>LibraryConsoleApplication</Name>
+    <RootNamespace>LibraryConsoleApplication</RootNamespace>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
+    <TestFramework>unittest</TestFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DataAccess\AuthorRepository.py" />
+    <Compile Include="DataAccess\BaseRepository.py" />
+    <Compile Include="DataAccess\BookAuthorRepository.py" />
+    <Compile Include="DataAccess\BookCategoryRepository.py" />
+    <Compile Include="DataAccess\BookRepository.py" />
+    <Compile Include="DataAccess\BorrowingRepository.py" />
+    <Compile Include="DataAccess\BorrowRequestRepository.py" />
+    <Compile Include="DataAccess\CategoryRepository.py" />
+    <Compile Include="DataAccess\CommonQueriesRepository.py" />
+    <Compile Include="DataAccess\Connection.py" />
+    <Compile Include="DataAccess\Decorators.py" />
+    <Compile Include="DataAccess\TestingRepository.py" />
+    <Compile Include="Exceptions\Exceptions.py" />
+    <Compile Include="DataAccess\GuestRepository.py" />
+    <Compile Include="DataAccess\LibrarianActivityLogRepository.py" />
+    <Compile Include="DataAccess\LibrarianRepository.py" />
+    <Compile Include="DataAccess\MemberRepository.py" />
+    <Compile Include="DataAccess\MessageRepository.py" />
+    <Compile Include="Exceptions\__init__.py" />
+    <Compile Include="Models\Models.py" />
+    <Compile Include="DataAccess\PublisherRepository.py" />
+    <Compile Include="Models\Schema.py" />
+    <Compile Include="DataAccess\SqlBuilder.py" />
+    <Compile Include="DataAccess\UserRepository.py" />
+    <Compile Include="DataAccess\__init__.py" />
+    <Compile Include="Core\JWT.py" />
+    <Compile Include="Models\__init__.py" />
+    <Compile Include="Core\PasswordManagement.py" />
+    <Compile Include="Presentation\ConsoleUI\ConsoleApp.py" />
+    <Compile Include="Presentation\ConsoleUI\__init__.py" />
+    <Compile Include="Presentation\WebUI\__init__.py" />
+    <Compile Include="Presentation\__init__.py" />
+    <Compile Include="Services\AdminServices.py" />
+    <Compile Include="Services\BaseServices.py" />
+    <Compile Include="Services\GuestServices.py" />
+    <Compile Include="Services\LibrarianServices.py" />
+    <Compile Include="Services\MemberServices.py" />
+    <Compile Include="Services\__init__.py" />
+    <Compile Include="Core\Validations.py" />
+<<<<<<< HEAD
+    <Compile Include="Tests\test_AuthorRepository.py" />
+    <Compile Include="Tests\test_CommonQueries.py" />
+    <Compile Include="Tests\__init__.py" />
+=======
+<<<<<<< HEAD
+    <Compile Include="Tests\TestAuthorRepository.py" />
+=======
+    <Compile Include="tests\test_author_repository.py" />
+>>>>>>> 494f50ab522d474d79e55163f40e7dba0c3e5897
+>>>>>>> 7aefcf327c60c724ac1f4743f894ff7f29b5df34
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="env\">
+      <Id>env</Id>
+      <Version>3.9</Version>
+      <Description>env (Python 3.9 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include=".env" />
+    <Content Include=".env.example" />
+    <Content Include="Presentation\ConsoleUI\template.txt" />
+    <Content Include="requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DataAccess\" />
+    <Folder Include="Models\" />
+    <Folder Include="Exceptions\" />
+    <Folder Include="Core\" />
+<<<<<<< HEAD
+    <Folder Include="Tests\" />
+=======
+<<<<<<< HEAD
+    <Folder Include="Tests\" />
+=======
+    <Folder Include="tests\" />
+>>>>>>> 494f50ab522d474d79e55163f40e7dba0c3e5897
+>>>>>>> 7aefcf327c60c724ac1f4743f894ff7f29b5df34
+    <Folder Include="Presentation\" />
+    <Folder Include="Presentation\ConsoleUI\" />
+    <Folder Include="Presentation\WebUI\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
