@@ -11,10 +11,10 @@ class TestingRepository(CommonQueriesRepository):
     model_class = TestingModel
     view_model_class = TestingViewModel
     insert_clause_exclude = {
-        DBTableColumns.Author.ID    
+        DBTableColumns.Testing.ID    
     }
     set_clause_exclude = {
-        DBTableColumns.Author.ID    
+        DBTableColumns.Testing.ID    
     }
     where_clause_exclude = set()
 

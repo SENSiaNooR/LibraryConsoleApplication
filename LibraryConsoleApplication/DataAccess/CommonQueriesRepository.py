@@ -3,7 +3,7 @@ from DataAccess.BaseRepository import BaseRepository
 from Exceptions.Exceptions import EmptyModelError, MultipleRowsReturnedError
 from psycopg2.extensions import cursor as PgCursor
 from DataAccess.SqlBuilder import build_insert_clause, build_set_clause, build_where_clause
-from Models.Models import BaseTableModel, BaseViewModel
+from Models.Models import BaseTableModel, BaseViewModel, UnsetType
 
 
 class CommonQueriesRepository(BaseRepository):
@@ -258,7 +258,7 @@ class CommonQueriesRepository(BaseRepository):
             model (BaseTableModel): Model instance containing updated data.
             cursor (Optional[PgCursor]): Optional database cursor.
         """
-        if model.id is None:
+        if model.id is None or isinstance(model.id, UnsetType):
             raise ValueError("Model must have an 'id' to perform update.")
     
         commit_and_close = False
@@ -506,7 +506,7 @@ class CommonQueriesRepository(BaseRepository):
             exclude (set): Fields to exclude from the SET clause (default {'id'}).
             cursor (Optional[PgCursor]): Optional database cursor.
         """
-        if model.id is None:
+        if model.id is None or isinstance(model.id, UnsetType):
             raise ValueError("Model must have an 'id' to perform update.")
     
         commit_and_close = False

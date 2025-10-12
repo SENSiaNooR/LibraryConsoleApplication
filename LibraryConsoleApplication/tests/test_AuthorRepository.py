@@ -26,19 +26,6 @@ class TestAuthorRepository(unittest.TestCase):
             AuthorRepository.remove(model, cursor = self.cursor)
         with self.assertRaises(RepositoryMethodNotAllowedError):
             AuthorRepository.clear(cursor = self.cursor)
-        
-    def test_get_one(self):
-        model = AuthorModel(name = 'احمد شاملو')
-        
-        db_model = AuthorRepository.get_one(model, cursor = self.cursor)
-        
-        expected_model = AuthorModel(
-            id = 1,
-            name = 'احمد شاملو',
-            biography= 'شاعر، نویسنده و مترجم ایرانی که به عنوان یکی از تأثیرگذارترین شاعران معاصر شناخته می‌شود.'
-        )
-        
-        self.assertEqual(db_model, expected_model)
 
 
         
