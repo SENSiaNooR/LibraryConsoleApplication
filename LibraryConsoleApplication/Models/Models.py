@@ -38,6 +38,7 @@ class UserType(Enum):
     admin = 'admin'
     librarian = 'librarian'
     member = 'member'
+    guest = 'guest'
     
 def adapt_enum(enum_val):
     return AsIs(f"'{enum_val.value}'")
@@ -590,12 +591,12 @@ class UserWithoutPasswordViewModel(BaseViewModel):
     Represents a view of user details excluding password.
 
     Attributes:
-        id (int | None | UnsetType): User ID.
+        id (int | UUID | None | UnsetType): User ID.
         username (str | None | UnsetType): Username.
         name (str | None | UnsetType): Full name.
         user_type (UserType | None | UnsetType): Role type.
     """
-    id: Union[int, None, UnsetType] = UNSET
+    id: Union[int, UUID, None, UnsetType] = UNSET
     username: Union[str, None, UnsetType] = UNSET
     name: Union[str, None, UnsetType] = UNSET
     user_type: Union[UserType, None, UnsetType] = UNSET

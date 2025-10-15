@@ -56,9 +56,12 @@
     <Compile Include="Presentation\WebUI\__init__.py" />
     <Compile Include="Presentation\__init__.py" />
     <Compile Include="Services\AdminServices.py" />
+    <Compile Include="Services\AuthServices.py" />
     <Compile Include="Services\BaseServices.py" />
+    <Compile Include="Services\Decorators.py" />
     <Compile Include="Services\GuestServices.py" />
     <Compile Include="Services\LibrarianServices.py" />
+    <Compile Include="Services\LoginResultModel.py" />
     <Compile Include="Services\MemberServices.py" />
     <Compile Include="Services\__init__.py" />
     <Compile Include="Core\Validations.py" />

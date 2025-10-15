@@ -48,3 +48,11 @@ class InactiveMemberBorrowRequestError(Exception):
 class BorrowRequestAlreadyHandledError(Exception):
     """Raised when try handle (update) borrow request that already handled before."""
     pass
+
+class AuthenticationError(Exception):
+    """
+    Raised when user authentication fails, 
+    e.g., invalid username/password or token issues.
+    """
+    def __init__(self, message: str = "Authentication failed"):
+        super().__init__(message)

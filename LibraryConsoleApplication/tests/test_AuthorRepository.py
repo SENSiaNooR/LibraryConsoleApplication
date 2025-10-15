@@ -2,7 +2,7 @@
 import unittest
 from Exceptions.Exceptions import RepositoryMethodNotAllowedError
 
-from Models.Models import AuthorModel
+from Models.Models import AuthorModel, UserType, UserWithoutPasswordViewModel
 
 
 class TestAuthorRepository(unittest.TestCase):

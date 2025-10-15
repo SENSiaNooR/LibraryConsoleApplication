@@ -2,7 +2,7 @@
 from DataAccess.CommonQueriesRepository import CommonQueriesRepository
 from DataAccess.Decorators import forbidden_method
 from Exceptions.Exceptions import AuthenticationFailed, NotSuchModelInDataBaseError
-from Models.Models import PlainUserModel, UserModel, UserType, UserViewModel
+from Models.Models import PlainUserModel, UserModel, UserType, UserViewModel, UserWithoutPasswordViewModel
 from Models.Schema import DBTableColumns, DBTables, DBViews
 from psycopg2.extensions import cursor as PgCursor
 from Core.PasswordManagement import PasswordManager
@@ -28,13 +28,9 @@ class UserRepository(CommonQueriesRepository):
     # Methods
     
     @classmethod
-    def verify_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> bool:
+    def verify_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> Optional[UserWithoutPasswordViewModel]:
         """
         Verifies a user's credentials by comparing the provided plain password with the stored hash.
-
-        This method retrieves the user record from the database using the provided username,
-        then verifies whether the given plain-text password matches the stored hashed password.
-        It is typically used during the login process.
 
         Args:
             plain_user_model (PlainUserModel):
@@ -43,16 +39,8 @@ class UserRepository(CommonQueriesRepository):
                 Existing database cursor. If not provided, a new one will be created automatically.
 
         Returns:
-            bool:
-                True if the provided credentials are valid; False otherwise.
-
-        Raises:
-            ValueError:
-                If the username or password is not a string.
-            NotSuchModelInDataBaseError:
-                If the user with the specified username does not exist in the database.
-            DatabaseError:
-                If any database operation fails.
+            Optional[UserWithoutPasswordViewModel]:
+                Returns a user view model (without password) if credentials are valid; None otherwise.
         """
         if (not isinstance(plain_user_model.username, str)) or (not isinstance(plain_user_model.password, str)):
             raise ValueError('username and password must be string')
@@ -62,8 +50,14 @@ class UserRepository(CommonQueriesRepository):
             cursor = cls._get_cursor()
             commit_and_close = True
 
-        model = UserModel(username = plain_user_model.username)
-        db_model = cls.get_one(model, cursor)
+        model = UserViewModel(username = plain_user_model.username)
+        db_model = cls.view_one(model, cursor)
+        
+        if db_model is None:
+            if commit_and_close:
+                cursor.connection.commit()
+                cursor.connection.close()
+            return None
     
         password_manager = PasswordManager()
         
@@ -76,7 +70,10 @@ class UserRepository(CommonQueriesRepository):
             cursor.connection.commit()
             cursor.connection.close()
             
-        return verification
+        if not verification:
+            return None
+        
+        return UserWithoutPasswordViewModel(db_model.id, db_model.username, db_model.name, db_model.user_type)
 
     @classmethod
     def hash_password_and_add_user(cls, plain_user_model : PlainUserModel, cursor : Optional[PgCursor] = None) -> UserModel:
