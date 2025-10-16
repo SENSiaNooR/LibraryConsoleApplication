@@ -95,35 +95,7 @@ class GuestRepository(CommonQueriesRepository):
         if commit_and_close:
             cursor.connection.commit()
             cursor.connection.close()
-
-    ################### MUST MOVE TO SERVICE LAYER #####################
-    #@classmethod
-    #def can_guest_request(cls, model : model_class, max_requests: int, max_minutes: int, cursor: Optional[PgCursor] = None) -> bool:
-    #    
-    #    commit_and_close = False
-    #    if cursor is None:
-    #        cursor = cls._get_cursor()
-    #        commit_and_close = True
-    #    
-    #    guest = cls.get_one(model, cursor)
-    #
-    #    if guest is None:
-    #        raise NotSuchModelInDataBaseError('can not find guest', model)
-    #
-    #    now = datetime.now(ZoneInfo("Asia/Tehran"))
-    #    delta_minutes = (now - guest.created_time).total_seconds() / 60
-    #
-    #    result : bool = True
-    #    
-    #    if guest.request_count >= max_requests or delta_minutes >= max_minutes:
-    #        result = False
-    #
-    #    if commit_and_close:
-    #        cursor.connection.commit()
-    #        cursor.connection.close()
-    #        
-    #    return result
-    
+  
 
 
     # Inherited Methods

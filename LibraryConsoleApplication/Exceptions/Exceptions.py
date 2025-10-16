@@ -56,3 +56,10 @@ class AuthenticationError(Exception):
     """
     def __init__(self, message: str = "Authentication failed"):
         super().__init__(message)
+        
+class ReachedToRequestLimitError(Exception):
+    """Raised when guest request more than limitation."""
+    pass
+
+class InappropriateRoleError(Exception):
+    """Raised when try to get instance of Service classes (such as MemberServices) by token of other roles (such as guest)."""

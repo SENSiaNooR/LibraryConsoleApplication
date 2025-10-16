@@ -30,7 +30,7 @@ class AuthServices:
             id = guest.id,
             username = None,
             name = None,
-            user_type = UserType.guest
+            user_type = 'guest'
         )
         
         token = jwt_manager.create_token(user.__dict__)

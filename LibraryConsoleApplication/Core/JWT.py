@@ -1,5 +1,7 @@
-﻿import os
+﻿from enum import Enum
+import os
 from time import sleep
+from uuid import UUID
 import jwt
 from datetime import datetime, timedelta
 from typing import Optional, Dict
@@ -31,9 +33,15 @@ class JWTManager:
 
     def create_token(self, data: dict) -> str:
         to_encode = data.copy()
+        safe_data = {}
+        for k, v in data.items():
+            if isinstance(v, UUID):
+                safe_data[k] = str(v)
+            else:
+                safe_data[k] = v
         expire = datetime.utcnow() + self.exp
-        to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        safe_data.update({"exp": expire})
+        return jwt.encode(safe_data, self.secret_key, algorithm=self.algorithm)
 
     def decode_token(self, token: str) -> Dict:
         try:
