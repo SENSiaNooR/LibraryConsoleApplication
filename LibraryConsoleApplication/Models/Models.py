@@ -8,7 +8,7 @@ from psycopg2.extensions import register_adapter, AsIs
 
 # Unset type
 
-class UnsetType:   
+class UnsetType:
     def __repr__(self) -> str:
         return '<UNSET>'
 

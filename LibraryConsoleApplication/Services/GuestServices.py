@@ -1,16 +1,15 @@
-
-from datetime import datetime
-from email import message
+﻿
 import os
 from pathlib import Path
+from typing import Optional
+from datetime import datetime
 from zoneinfo import ZoneInfo
-from Exceptions.Exceptions import InappropriateRoleError, NotSuchModelInDataBaseError, ReachedToRequestLimitError
 from dotenv import load_dotenv
-from DataAccess.GuestRepository import GuestRepository
-from Models.Models import BookViewModel, GuestModel
+from Models.Models import GuestModel
 from Services.BaseServices import BaseServices
-from Services.Decorators import token_required
-from DataAccess.BookRepository import BookRepository
+from Services.Decorators import guest_request_limit, token_required
+from DataAccess.GuestRepository import GuestRepository
+from Exceptions.Exceptions import InappropriateRoleError, NotSuchModelInDataBaseError, ReachedToRequestLimitError
 
 
 class GuestServices(BaseServices):
@@ -33,7 +32,7 @@ class GuestServices(BaseServices):
             GuestServices.__env_loaded = True
 
 
-    def __can_guest_request(self) -> bool:    
+    def can_guest_request(self) -> bool:
         
         model = GuestModel(id = self.user_model.id)
         guest = GuestRepository.get_one(model)
@@ -49,15 +48,59 @@ class GuestServices(BaseServices):
         
         return True
     
-    def __increase_guest_request(self):
+    def increase_guest_request(self):
         model = GuestModel(id = self.user_model.id)
         GuestRepository.increase_request(model)
 
 
+    @guest_request_limit
     @token_required
-    def get_all_books(self):
-        if not self.__can_guest_request():
+    def get_all_books(self):      
+        return super().get_all_books()
+    
+    @guest_request_limit
+    @token_required
+    def get_all_publishers(self):     
+        return super().get_all_publishers()
+
+    @guest_request_limit
+    @token_required
+    def publisher_search(self, name : str = ''):     
+        return super().publisher_search(name)
+    
+    @guest_request_limit
+    @token_required
+    def get_all_authors(self):
+        if not self.can_guest_request():
             raise ReachedToRequestLimitError()
-        self.__increase_guest_request()        
-        
-        return BookRepository.view_many(BookViewModel())
+        self.increase_guest_request()        
+        return super().get_all_authors()
+    
+    @guest_request_limit
+    @token_required
+    def author_search(self, name : str = ''):
+        return super().author_search(name)
+
+    @guest_request_limit
+    @token_required
+    def get_all_categories(self):       
+        return super().get_all_categories()
+    
+    @guest_request_limit
+    @token_required
+    def book_advance_search(
+        self,
+        title : str = '',
+        publisher : str = '',
+        author : str = '',
+        categories: Optional[list[str]] = None,
+        just_available: bool = False
+    ):
+        return super().book_advance_search(title, publisher, author, categories, just_available)
+
+    @guest_request_limit
+    @token_required
+    def book_search(self, title : str = ''):
+        return super().book_search(title)
+
+    

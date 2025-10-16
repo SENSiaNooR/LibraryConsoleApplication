@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-import os
-import time
 from Exceptions.Exceptions import InappropriateRoleError, ReachedToRequestLimitError
-from Models.Models import PlainUserModel, UserType
+from Models.Models import PlainUserModel
 from Services.AdminServices import AdminServices
 from Services.LibrarianServices import LibrarianServices
 from Services.AuthServices import AuthServices
@@ -55,6 +53,15 @@ class TestServices(unittest.TestCase):
         plain_user = PlainUserModel(username = 'librarian3', password = 'qazwsxedc')
         login_res = AuthServices.login(plain_user)
         service_provider = LibrarianServices(login_res.token)
+
+    def test_guest_services_case2(self):
+        token = AuthServices.login_as_guest()
+        service_provider = GuestServices(token)
+        a = service_provider.book_advance_search(title='ر',categories=['رمان', 'حماسی', 'زنانه'])
+        
+        
+
+        
         
 
         
