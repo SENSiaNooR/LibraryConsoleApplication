@@ -10,14 +10,6 @@ import unittest
 
 
 class TestServices(unittest.TestCase):
-    
-    def setUp(self) -> None:
-        
-        pass
-              
-    def tearDown(self) -> None:
-        pass
-        
 
     def test_login(self):
         plain_user = PlainUserModel(username = 'ahmadmanafi', password = '11mm33nn55')

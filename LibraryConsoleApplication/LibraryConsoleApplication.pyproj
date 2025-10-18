@@ -51,7 +51,20 @@
     <Compile Include="Core\JWT.py" />
     <Compile Include="Models\__init__.py" />
     <Compile Include="Core\PasswordManagement.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\Button.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\Element.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\InputBox.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\Page.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\SizeAndPosition.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\Table.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\Text.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\__init__.py" />
     <Compile Include="Presentation\ConsoleUI\ConsoleApp.py" />
+    <Compile Include="Presentation\ConsoleUI\Pages\AdminPanel.py" />
+    <Compile Include="Presentation\ConsoleUI\Pages\GuestPanel.py" />
+    <Compile Include="Presentation\ConsoleUI\Pages\LibrarianPanel.py" />
+    <Compile Include="Presentation\ConsoleUI\Pages\MemberPanel.py" />
+    <Compile Include="Presentation\ConsoleUI\Pages\__init__.py" />
     <Compile Include="Presentation\ConsoleUI\__init__.py" />
     <Compile Include="Presentation\WebUI\__init__.py" />
     <Compile Include="Presentation\__init__.py" />
@@ -68,6 +81,7 @@
     <Compile Include="Tests\test_AuthorRepository.py" />
     <Compile Include="Tests\test_CommonQueries.py" />
     <Compile Include="Tests\test_Services.py" />
+    <Compile Include="Tests\test_SizeAndPosition.py" />
     <Compile Include="Tests\__init__.py" />
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +106,8 @@
     <Folder Include="Models\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Core\" />
+    <Folder Include="Presentation\ConsoleUI\Components\" />
+    <Folder Include="Presentation\ConsoleUI\Pages\" />
     <Folder Include="Tests\" />
     <Folder Include="Presentation\" />
     <Folder Include="Presentation\ConsoleUI\" />

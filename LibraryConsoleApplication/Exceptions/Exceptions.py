@@ -63,3 +63,12 @@ class ReachedToRequestLimitError(Exception):
 
 class InappropriateRoleError(Exception):
     """Raised when try to get instance of Service classes (such as MemberServices) by token of other roles (such as guest)."""
+    pass
+    
+class NotFocusableElementError(Exception):
+    """Raised when try to focus or unfocus on not focusable element like 'Text'."""
+    pass
+
+class NotClickableElementError(Exception):
+    """Raised when try to click on not clickable element like 'Text'."""
+    pass
