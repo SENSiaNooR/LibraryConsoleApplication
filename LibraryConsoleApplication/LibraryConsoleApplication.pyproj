@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>321e68e1-3ea9-425f-81e7-0f63dba5c603</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Tests\TestAuthorRepository.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -13,6 +13,7 @@
     <RootNamespace>LibraryConsoleApplication</RootNamespace>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <TestFramework>unittest</TestFramework>
+    <SuppressPackageInstallationPrompt>True</SuppressPackageInstallationPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -42,6 +43,7 @@
     <Compile Include="DataAccess\MemberRepository.py" />
     <Compile Include="DataAccess\MessageRepository.py" />
     <Compile Include="Exceptions\__init__.py" />
+    <Compile Include="main.py" />
     <Compile Include="Models\Models.py" />
     <Compile Include="DataAccess\PublisherRepository.py" />
     <Compile Include="Models\Schema.py" />
@@ -52,6 +54,7 @@
     <Compile Include="Models\__init__.py" />
     <Compile Include="Core\PasswordManagement.py" />
     <Compile Include="Presentation\ConsoleUI\Components\Button.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\ConsoleExtension.py" />
     <Compile Include="Presentation\ConsoleUI\Components\Element.py" />
     <Compile Include="Presentation\ConsoleUI\Components\InputBox.py" />
     <Compile Include="Presentation\ConsoleUI\Components\Page.py" />

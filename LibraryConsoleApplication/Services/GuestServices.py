@@ -52,6 +52,15 @@ class GuestServices(BaseServices):
         model = GuestModel(id = self.user_model.id)
         GuestRepository.increase_request(model)
 
+    @token_required
+    def get_guest_model(self):
+        model = GuestModel(id = self.user_model.id)
+        guest : GuestModel = GuestRepository.get_one(model)
+    
+        if guest is None:
+            raise NotSuchModelInDataBaseError('can not find guest', model)
+        
+        return guest
 
     @guest_request_limit
     @token_required
@@ -70,10 +79,7 @@ class GuestServices(BaseServices):
     
     @guest_request_limit
     @token_required
-    def get_all_authors(self):
-        if not self.can_guest_request():
-            raise ReachedToRequestLimitError()
-        self.increase_guest_request()        
+    def get_all_authors(self):      
         return super().get_all_authors()
     
     @guest_request_limit

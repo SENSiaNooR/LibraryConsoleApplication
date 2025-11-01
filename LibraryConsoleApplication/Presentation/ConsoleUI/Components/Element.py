@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 from typing import Optional
 from Exceptions.Exceptions import NotClickableElementError, NotFocusableElementError
 from Presentation.ConsoleUI.Components.SizeAndPosition import SizeAndPosition
@@ -49,27 +49,26 @@ class Element(ABC):
                 raise TypeError(f"linked element '{key}' must be an Element or None")
             self.linked_elements[key] = value
 
-    @abstractmethod
     def focus(self):
         """Called when the element gains focus."""
         if not self.focusable:
             raise NotFocusableElementError()
         self._is_focused = True
 
-    @abstractmethod
     def unfocus(self):
         """Called when the element loses focus."""
         if not self.focusable:
             raise NotFocusableElementError()
         self._is_focused = False
+        
+    def is_focused(self):
+        return self._is_focused
 
-    @abstractmethod
-    def click(self):
-        """Executes the element�s click action if clickable."""
+    def click(self, top_offset = 0, left_offset = 0):
+        """Executes the element’s click action if clickable."""
         if not self.clickable:
             raise NotClickableElementError()
 
-    @abstractmethod
     def render(self, top_offset = 0, left_offset = 0):
         """Renders the element."""
         pass

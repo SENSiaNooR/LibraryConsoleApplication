@@ -1,5 +1,5 @@
 import re
-from PasswordManagement import PasswordManager
+from Core.PasswordManagement import PasswordManager
 
 class Validations:
     

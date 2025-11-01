@@ -23,7 +23,7 @@ class SizeAndPosition:
         The y-coordinate of the bottom edge (derived).
     """
 
-    def __init__(self, left: int, top: int, height: int, width: int):
+    def __init__(self, left: int = 0, top: int = 0, height: int = 1, width: int = 1):
         self.left = left
         self.top = top
         self.height = height
