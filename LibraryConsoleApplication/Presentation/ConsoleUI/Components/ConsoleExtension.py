@@ -5,6 +5,7 @@ from arabic_reshaper import reshape
 from bidi.algorithm import get_display
 from Presentation.ConsoleUI.Components.SizeAndPosition import SizeAndPosition
 
+optimize_for_farsi_flag = False
 
 class ConsoleExtension:
     
@@ -115,6 +116,8 @@ class ConsoleExtension:
 
     @classmethod
     def optimize_for_farsi(cls, txt):
+        if optimize_for_farsi_flag:
+            return txt
         if any('\u0600' <= c <= '\u06FF' for c in txt):
                 return get_display(reshape(txt))
         return txt

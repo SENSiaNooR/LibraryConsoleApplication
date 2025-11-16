@@ -1,4 +1,7 @@
 
+from xml.sax.handler import property_declaration_handler
+
+
 class SizeAndPosition:
     """
     Represents a rectangular region defined by its position (left, top)
@@ -100,6 +103,14 @@ class SizeAndPosition:
         if bottom <= self._y:
             raise ValueError("bottom cannot be less than or equal to top")
         self._h = bottom - self._y
+        
+    @property
+    def x_center(self):
+        return self._x + self._w / 2
+    
+    @property
+    def y_center(self):
+        return self._y + self._h / 2
 
     def __repr__(self):
         return f"{self.__class__.__name__}(left={self._x}, top={self._y}, height={self._h}, width={self._w})"

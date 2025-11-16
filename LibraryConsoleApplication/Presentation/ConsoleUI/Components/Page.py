@@ -1,5 +1,6 @@
 ﻿from typing import List, Any
 import time
+import math
 import shutil
 from Presentation.ConsoleUI.Components.ConsoleExtension import ConsoleExtension
 from Presentation.ConsoleUI.Components.Element import Element
@@ -55,7 +56,7 @@ class Page:
         self,
         position: SizeAndPosition,
         elements: List[Element] = None,
-        auto_resize: bool = True,
+        auto_resize: bool = False,
         border: bool = True
     ):
         if not isinstance(position, SizeAndPosition):
@@ -71,7 +72,7 @@ class Page:
         self.border = border
         self.exit_flag = False
         
-        self.__update_focused()
+        self.update_focused()
             
         if auto_resize:
             self.resize()
@@ -98,7 +99,7 @@ class Page:
             clickables += [element for element in elements if element.clickable]
         return clickables
 
-    def __update_focused(self):
+    def update_focused(self):
         """Ensure exactly one focusable element is active (if any exist)."""
         focusables = self.__get_focusables()
         if not focusables:
@@ -119,14 +120,14 @@ class Page:
     def add_element(self, element: Element):
         """Add a new element to the page and optionally resize."""
         self.elements.append(element)
-        self.__update_focused()
+        self.update_focused()
         if self.auto_resize:
             self.resize()
             
     def remove_element(self, element: Element):
         """Remove an existing element from the page and optionally resize."""
         self.elements.remove(element)
-        self.__update_focused()
+        self.update_focused()
         if self.auto_resize:
             self.resize()
 
@@ -228,3 +229,164 @@ class Page:
             raise Exception()        
         focused = focused[0]
         return focused.click(self.position.top, self.position.left)
+    
+
+    def auto_link_focusables_angle_base(self, diagonal_threshold: float = 0.7):
+        """
+        Automatically detects and assigns directional focus links between focusable elements
+        based on their positions.
+
+        Parameters
+        ----------
+        diagonal_threshold : float
+            If the ratio between horizontal and vertical distance is less than this threshold,
+            both directions (e.g., up+left) will be assigned for smoother navigation.
+        """
+        focusables = self.__get_focusables()
+        if not focusables:
+            return
+
+        # پاکسازی لینک‌های قبلی
+        for el in focusables:
+            el.linked_elements = {}
+
+        for a in focusables:
+            ax, ay = a.position.x_center, a.position.y_center
+            nearest = {'u': None, 'd': None, 'l': None, 'r': None}
+            nearest_dist = {'u': float('inf'), 'd': float('inf'), 'l': float('inf'), 'r': float('inf')}
+
+            for b in focusables:
+                if a is b:
+                    continue
+
+                bx, by = b.position.x_center, b.position.y_center
+                dx, dy = bx - ax, (by - ay) * 2
+                distance = math.hypot(dx, dy)
+                if distance == 0:
+                    continue
+
+                # جهت تعیین کن
+                horiz = abs(dx) > abs(dy)
+                vert = abs(dy) > abs(dx)
+                ratio = min(abs(dx), abs(dy)) / max(abs(dx), abs(dy))
+
+                if dy < 0 and abs(dy) >= abs(dx):  # بالا
+                    if distance < nearest_dist['u']:
+                        nearest['u'] = b
+                        nearest_dist['u'] = distance
+
+                if dy > 0 and abs(dy) >= abs(dx):  # پایین
+                    if distance < nearest_dist['d']:
+                        nearest['d'] = b
+                        nearest_dist['d'] = distance
+
+                if dx < 0 and abs(dx) >= abs(dy):  # چپ
+                    if distance < nearest_dist['l']:
+                        nearest['l'] = b
+                        nearest_dist['l'] = distance
+
+                if dx > 0 and abs(dx) >= abs(dy):  # راست
+                    if distance < nearest_dist['r']:
+                        nearest['r'] = b
+                        nearest_dist['r'] = distance
+
+                # حالت مورب (ساعتی 10 مثلاً)
+                if ratio >= diagonal_threshold:
+                    if dx < 0 and dy < 0:  # بالا-چپ
+                        if distance < nearest_dist['u']:
+                            nearest['u'] = b
+                            nearest_dist['u'] = distance
+                        if distance < nearest_dist['l']:
+                            nearest['l'] = b
+                            nearest_dist['l'] = distance
+                    elif dx > 0 and dy < 0:  # بالا-راست
+                        if distance < nearest_dist['u']:
+                            nearest['u'] = b
+                            nearest_dist['u'] = distance
+                        if distance < nearest_dist['r']:
+                            nearest['r'] = b
+                            nearest_dist['r'] = distance
+                    elif dx < 0 and dy > 0:  # پایین-چپ
+                        if distance < nearest_dist['d']:
+                            nearest['d'] = b
+                            nearest_dist['d'] = distance
+                        if distance < nearest_dist['l']:
+                            nearest['l'] = b
+                            nearest_dist['l'] = distance
+                    elif dx > 0 and dy > 0:  # پایین-راست
+                        if distance < nearest_dist['d']:
+                            nearest['d'] = b
+                            nearest_dist['d'] = distance
+                        if distance < nearest_dist['r']:
+                            nearest['r'] = b
+                            nearest_dist['r'] = distance
+
+            a.linked_elements = {k: v for k, v in nearest.items() if v is not None}
+            
+    def auto_link_focusables_grid_base(self):
+        """
+        Automatically assigns directional focus links (u, d, l, r)
+        between focusable elements based on their relative positions
+        on the page (grid-based logic).
+
+        Notes
+        -----
+        - Vertical coordinates are scaled by 2 to account for console
+            aspect ratio (rows are visually taller than columns).
+        - For each element, the closest neighbor in each direction is linked.
+        """
+        focusables = self.__get_focusables()
+        if not focusables:
+            return
+    
+        for cur in focusables:
+            cx = cur.position.x_center
+            cy = cur.position.y_center * 2  # scale Y axis
+            cur.linked_elements.clear()
+
+            nearest = {'u': None, 'd': None, 'l': None, 'r': None}
+            min_dist = {'u': float('inf'), 'd': float('inf'),
+                        'l': float('inf'), 'r': float('inf')}
+
+            for other in focusables:
+                if other is cur:
+                    continue
+
+                ox = other.position.x_center
+                oy = other.position.y_center * 2
+
+                dx = ox - cx
+                dy = oy - cy
+
+                # ↑ بالا
+                if dy < 0 and abs(dx) < cur.position.width * 1.5:
+                    dist = abs(dy)
+                    if dist < min_dist['u']:
+                        min_dist['u'] = dist
+                        nearest['u'] = other
+
+                # ↓ پایین
+                if dy > 0 and abs(dx) < cur.position.width * 1.5:
+                    dist = abs(dy)
+                    if dist < min_dist['d']:
+                        min_dist['d'] = dist
+                        nearest['d'] = other
+
+                # ← چپ
+                if dx < 0 and abs(dy) < cur.position.height * 2:
+                    dist = abs(dx)
+                    if dist < min_dist['l']:
+                        min_dist['l'] = dist
+                        nearest['l'] = other
+
+                # → راست
+                if dx > 0 and abs(dy) < cur.position.height * 2:
+                    dist = abs(dx)
+                    if dist < min_dist['r']:
+                        min_dist['r'] = dist
+                        nearest['r'] = other
+
+            for dir_, target in nearest.items():
+                if target:
+                    cur.linked_elements[dir_] = target
+

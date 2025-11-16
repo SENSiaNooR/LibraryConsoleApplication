@@ -19,28 +19,30 @@ from Services.GuestServices import GuestServices
 
 class GuestPanel:
     
+    _page_position : SizeAndPosition
+
     def __init__(self, token):
         self.service_provider = GuestServices(token)
         self.token = token
+        self._page_position = SizeAndPosition(30,1,36,150)
 
-    def _create_page(self, title: str, elements: list[Element]) -> Page:
+    def _create_page(self, title: str) -> Page:
+        page = Page(self._page_position)
         guest_model = self.service_provider.get_guest_model()
-        
-        page = Page(elements, SizeAndPosition(30,1,36,150), auto_resize=False)
-        base_elements = [
-            Text(title, SizeAndPosition(65, 0, 1, 20), halign='c'),
+        page.add_element(Text(title, SizeAndPosition(left = (self._page_position.width - 20) // 2, width = 20), halign='c'))
+        page.add_element(
             Text(
                 content = f'id = {guest_model.id}\nدرخواست ها : {guest_model.request_count}\nکاربر : مهمان',
-                position = SizeAndPosition(1,0)    
-            ),
+                position = SizeAndPosition(left = 1, top = 0)
+            )
+        )
+        page.add_element(
             Text(
                 content = ' با استفاده از کلید های ← → ↓ ↑ بین گزینه ها جابجا شوید و با کلید Enter گزینه مورد نظر را انتخاب کنید.',
-                position = SizeAndPosition(top = 35, width = 150),
+                position = SizeAndPosition(top = self._page_position.height - 1, width = self._page_position.width),
                 halign = 'r'
             )
-        ]
-        page.elements = base_elements + page.elements
-        page.border = True
+        )
         return page
 
     #==================================== Home Page =================================
@@ -49,9 +51,11 @@ class GuestPanel:
         if not self.service_provider.can_guest_request():
             return self.get_request_limited_page()
 
+        page = self._create_page('صفحه اصلی')
+        
         #=============================================================================
         #=========================== Elements Initializing ===========================
-
+        
         signup_button = Button(
             text = f'ثبت نام',
             position = SizeAndPosition(left = 124, top = 0, width = 8),
@@ -92,49 +96,17 @@ class GuestPanel:
             position = SizeAndPosition(top = 20, width = 150),
             halign = 'c'
         )
-
-        #=============================================================================
-        #=========================== Link Elemnets Together ==========================
-        
-        signup_button.linked_elements['r'] = login_button
-        signup_button.linked_elements['l'] = books_button
-        signup_button.linked_elements['d'] = books_button
-        
-        login_button.linked_elements['l'] = signup_button
-        login_button.linked_elements['d'] = books_button
-        
-        books_button.linked_elements['u'] = signup_button
-        books_button.linked_elements['r'] = signup_button
-        books_button.linked_elements['d'] = publishers_button
-
-        publishers_button.linked_elements['u'] = books_button
-        publishers_button.linked_elements['r'] = signup_button
-        publishers_button.linked_elements['d'] = authors_button
-        
-        authors_button.linked_elements['u'] = publishers_button
-        authors_button.linked_elements['r'] = signup_button
-        authors_button.linked_elements['d'] = categories_button
-
-        categories_button.linked_elements['u'] = authors_button
-        categories_button.linked_elements['r'] = signup_button
-        categories_button.linked_elements['d'] = about_us_button
-        
-        about_us_button.linked_elements['u'] = categories_button
-        about_us_button.linked_elements['r'] = signup_button
-        about_us_button.linked_elements['d'] = exit_button
-        
-        exit_button.linked_elements['u'] = about_us_button
-        exit_button.linked_elements['r'] = signup_button
        
-
         #=============================================================================
         #=========================== Page Initializing ===============================
-        elements = [
+        page.elements += [
                 books_button, exit_button, about_us_button, categories_button, authors_button,
                 publishers_button, login_button, signup_button
         ]
-        page = self._create_page('صفحه اصلی', elements)
-        
+        page.update_focused()
+        #=============================================================================
+        #=========================== Link Elemnets Together ==========================
+        page.auto_link_focusables_angle_base(0.27)  
         #=============================================================================
         #=========================== Click Functions Initializing ====================
         
@@ -163,7 +135,9 @@ class GuestPanel:
 
     #==================================== Request Limited Page =================================
     def get_request_limited_page(self) -> Page:
-                
+         
+        page = self._create_page('متاسفیم!')
+
         #=============================================================================
         #=========================== Elements Initializing ===========================
         signup_button = Button(
@@ -176,7 +150,6 @@ class GuestPanel:
             position = SizeAndPosition(left = 139, top = 0, width = 5),
             halign = 'c'
         )
-
         tip = Text(
             content = f'تعداد درخواست های شما از حد مجاز عبور کرده یا مدت زمان شما به اتمام رسیده است.\n'
             'لطفا پس از خروج مجددا وارد شوید یا در برنامه ما ثبت نام کنید تا از کلیه خدمات بهره مند شوید.\n'
@@ -184,33 +157,18 @@ class GuestPanel:
             position = SizeAndPosition(width = 150, top = 8),
             halign = 'c'
         )
-
         exit_button = Button(
             text = f'خروج',
             position = SizeAndPosition(top = 16, width = 150),
             halign = 'c'
         )
-
-        #=============================================================================
-        #=========================== Link Elemnets Together ==========================
-        
-        signup_button.linked_elements['r'] = login_button
-        signup_button.linked_elements['l'] = exit_button
-        signup_button.linked_elements['d'] = exit_button
-        
-        login_button.linked_elements['l'] = signup_button
-        login_button.linked_elements['d'] = exit_button
-        
-        exit_button.linked_elements['u'] = signup_button
-        exit_button.linked_elements['r'] = signup_button      
-
         #=============================================================================
         #=========================== Page Initializing ===============================
-        elements = [
-                exit_button, login_button, signup_button, tip
-        ]
-        page = self._create_page('متاسفیم!', elements)
-        
+        page.elements += [exit_button, login_button, signup_button, tip]
+        page.update_focused()
+        #=============================================================================
+        #=========================== Link Elemnets Together ==========================
+        page.auto_link_focusables_angle_base(0.27)
         #=============================================================================
         #=========================== Click Functions Initializing ====================
         
@@ -232,6 +190,8 @@ class GuestPanel:
     #==================================== Signup Page =================================
     def get_signup_page(self) -> Page:
         
+        page = self._create_page('صفحه ثبت نام')
+
         #=============================================================================
         #=========================== Elements Initializing ===========================
         name = Text(
@@ -242,7 +202,6 @@ class GuestPanel:
             display_text = 'نام و نام خانوادگی خود را وارد کنید',
             position = SizeAndPosition(left = 32, top = 8)
         )
-
         email = Text(
             content = f': ایمیل',
             position = SizeAndPosition(left = 10, top = 10)
@@ -252,7 +211,6 @@ class GuestPanel:
             checker = Validations.email_validation,
             position = SizeAndPosition(left = 32, top = 10)
         )
-
         username = Text(
             content = f': نام کاربری',
             position = SizeAndPosition(left = 80, top = 8)
@@ -262,7 +220,6 @@ class GuestPanel:
             checker = Validations.username_validation,
             position = SizeAndPosition(left = 95, top = 8)
         )
-
         password = Text(
             content = f': پسورد',
             position = SizeAndPosition(left = 10, top = 12)
@@ -273,7 +230,6 @@ class GuestPanel:
             position = SizeAndPosition(left = 32, top = 12),
             password_mode = True
         )
-
         repeat_password = Text(
             content = f': تکرار پسورد',
             position = SizeAndPosition(left = 80, top = 12)
@@ -284,7 +240,6 @@ class GuestPanel:
             position = SizeAndPosition(left = 95, top = 12),
             password_mode = True
         )
-
         helper = Table(
             data = [[Text(
                 content = 'توجه\n\n'
@@ -298,69 +253,39 @@ class GuestPanel:
             position = SizeAndPosition(top = 16, left = 18),
             show_row_id = False
         )
-        
         error_text = Text(
             content = '',
             position = SizeAndPosition(top = 25, width = 150),
             halign = 'c'
         )
-      
         signup_button = Button(
             text = 'ثبت نام',
             position = SizeAndPosition(top = 27, width = 150),
             halign = 'c'
         )
-        
         login_button = Button(
             text = 'قبلا ثبت نام کرده ام (ورود)',
             position = SizeAndPosition(top = 29, width = 150),
             halign = 'c'
         )
-        
         back_button = Button(
             text = 'ادامه دادن در حالت مهمان',
             position = SizeAndPosition(top = 31, width = 150),
             halign = 'c'
         )
-
-        #=============================================================================
-        #=========================== Link Elemnets Together ==========================
-        
-        name_input_box.linked_elements['d'] = email_input_box
-        name_input_box.linked_elements['r'] = username_input_box
-        
-        username_input_box.linked_elements['l'] = name_input_box
-        username_input_box.linked_elements['d'] = repeat_password_input_box
-        
-        email_input_box.linked_elements['u'] = name_input_box
-        email_input_box.linked_elements['d'] = password_input_box
-        email_input_box.linked_elements['r'] = username_input_box
-        
-        password_input_box.linked_elements['u'] = email_input_box
-        password_input_box.linked_elements['r'] = repeat_password_input_box
-        password_input_box.linked_elements['d'] = signup_button
-        
-        repeat_password_input_box.linked_elements['l'] = password_input_box
-        repeat_password_input_box.linked_elements['u'] = username_input_box
-        repeat_password_input_box.linked_elements['d'] = signup_button
-        
-        signup_button.linked_elements['u'] = password_input_box
-        signup_button.linked_elements['d'] = login_button
-        
-        login_button.linked_elements['u'] = signup_button
-        login_button.linked_elements['d'] = back_button
-        
-        back_button.linked_elements['u'] = login_button
-
-
         #=============================================================================
         #=========================== Page Initializing ===============================
-        elements = [
+        page.elements += [
             name, email, username, password, repeat_password,
             name_input_box, email_input_box, username_input_box, password_input_box, repeat_password_input_box,
             signup_button, login_button, back_button, helper, error_text
         ]
-        page = self._create_page('صفحه ثبت نام', elements)
+        page.update_focused()
+        
+        #=============================================================================
+        #=========================== Link Elemnets Together ==========================
+        page.auto_link_focusables_grid_base()
+        email_input_box.linked_elements['r'] = username_input_box
         #=============================================================================
         #=========================== Click Functions Initializing ====================
         
@@ -416,6 +341,8 @@ class GuestPanel:
     #==================================== Login Page =================================
     def get_login_page(self) -> Page:
         
+        page = self._create_page('صفحه ورود')
+        
         #=============================================================================
         #=========================== Elements Initializing ===========================       
         username = Text(
@@ -427,7 +354,6 @@ class GuestPanel:
             checker = Validations.username_validation,
             position = SizeAndPosition(left = 65, top = 8)
         )
-
         password = Text(
             content = f': پسورد',
             position = SizeAndPosition(left = 50, top = 10)
@@ -438,54 +364,37 @@ class GuestPanel:
             position = SizeAndPosition(left = 65, top = 10),
             password_mode = True
         )
-
         error_text = Text(
             content = '',
             position = SizeAndPosition(top = 14, width = 150),
             halign = 'c'
         )
-      
         login_button = Button(
             text = 'ورود',
             position = SizeAndPosition(top = 27, width = 150),
             halign = 'c'
         )
-        
         signup_button = Button(
             text = 'حساب ندارم. یک حساب بسازید (ثبت نام)',
             position = SizeAndPosition(top = 29, width = 150),
             halign = 'c'
         )
-        
         back_button = Button(
             text = 'ادامه دادن در حالت مهمان',
             position = SizeAndPosition(top = 31, width = 150),
             halign = 'c'
         )
-        #=============================================================================
-        #=========================== Link Elemnets Together ==========================
-                
-        username_input_box.linked_elements['d'] = password_input_box
-        
-        password_input_box.linked_elements['u'] = username_input_box
-        password_input_box.linked_elements['d'] = login_button
-                
-        login_button.linked_elements['u'] = password_input_box
-        login_button.linked_elements['d'] = signup_button
-        
-        signup_button.linked_elements['u'] = login_button
-        signup_button.linked_elements['d'] = back_button
-        
-        back_button.linked_elements['u'] = signup_button
-
 
         #=============================================================================
         #=========================== Page Initializing ===============================
-        elements = [
+        page.elements += [
             username, password, username_input_box, password_input_box,
             signup_button, login_button, back_button, error_text
         ]
-        page = self._create_page('صفحه ورود', elements)
+        page.update_focused()
+        #=============================================================================
+        #=========================== Link Elemnets Together ==========================
+        page.auto_link_focusables_grid_base()
         #=============================================================================
         #=========================== Click Functions Initializing ====================
 
@@ -528,123 +437,74 @@ class GuestPanel:
         if not self.service_provider.can_guest_request():
             return self.get_request_limited_page()
         
+        page = self._create_page('صفحه کتب')
+        page.bag_set('table_header', [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')])
+        page.bag_set('cur_page_number', 1)
         #=============================================================================
         #=========================== Elements Initializing ===========================       
         book_name_input_box = InputBox(
             display_text = 'نام کتاب را وارد کنید',
             position = SizeAndPosition(left = 63, top = 3)
         )
-      
         search_button = Button(
             text = 'جست و جو',
             position = SizeAndPosition(top = 5, left = 58)
         )
-        
         advance_search_button = Button(
             text = 'جست و جوی پیشرفته',
             position = SizeAndPosition(top = 5, left = 75)
         )
-        
+        books_table = Table([[]], SizeAndPosition(top = 7))
         prev_button = Button(
             text = 'قبلی',
             position = SizeAndPosition(top = 31, left = 40)
         )
-        
+        cur_page = Text(
+            content = f'صفحه {page.bag_get("cur_page_number")}',
+            position = SizeAndPosition(top = 31, left = 71)
+        )
         next_button = Button(
             text = 'بعدی',
             position = SizeAndPosition(top = 31, left = 100)
         )
-        
-        cur_page_number = 1
-
-        cur_page = Text(
-            content = f'صفحه {cur_page_number}',
-            position = SizeAndPosition(top = 31, left = 71)
-        )
-        
         back_button = Button(
             text = 'بازگشت',
             position = SizeAndPosition(top = 33, width = 150),
             halign = 'c'
         )
-        
-        fetch : List[BookViewModel] = self.service_provider.book_search()
-        start_row = (cur_page_number - 1) * 10
-        end_row = (cur_page_number * 10)
-        end_row = min(len(fetch), end_row)
-        
-        table_content : List[List[Element]] = [
-            [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
+        #=============================================================================
+        #=========================== Adding Page Elements ============================
+        page.elements += [
+            book_name_input_box, search_button, advance_search_button, prev_button, next_button, cur_page, back_button, books_table
         ]
-        for row in fetch[start_row:end_row]:
-            table_row = [
-                Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
-                Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-            ]
-            table_content.append(table_row)
-                
-        books_table = Table(table_content, SizeAndPosition(top = 7), start_row_id = start_row)
-        books_table.position.left = (150 - books_table.position.width) // 2
-        
-        next_button.position.top = books_table.position.bottom + 1
-        cur_page.position.top = books_table.position.bottom + 1
-        prev_button.position.top = books_table.position.bottom + 1
-            
+        page.update_focused()
         #=============================================================================
         #=========================== Link Elemnets Together ==========================
-                
-        book_name_input_box.linked_elements['d'] = search_button
-        
-        search_button.linked_elements['u'] = book_name_input_box
-        search_button.linked_elements['r'] = advance_search_button
+        page.auto_link_focusables_grid_base()
         search_button.linked_elements['d'] = prev_button
-        
-        advance_search_button.linked_elements['u'] = book_name_input_box
-        advance_search_button.linked_elements['l'] = search_button
         advance_search_button.linked_elements['d'] = next_button
         
         prev_button.linked_elements['u'] = search_button
-        prev_button.linked_elements['r'] = next_button
         prev_button.linked_elements['d'] = back_button
         
         next_button.linked_elements['u'] = advance_search_button
-        next_button.linked_elements['l'] = prev_button
         next_button.linked_elements['d'] = back_button
         
         back_button.linked_elements['u'] = next_button
         back_button.linked_elements['r'] = next_button
         back_button.linked_elements['l'] = prev_button
-
-        #=============================================================================
-        #=========================== Page Initializing ===============================
-        elements = [
-            book_name_input_box, search_button, advance_search_button, prev_button, next_button, cur_page, back_button, books_table
-        ]
-        page = self._create_page('صفحه کتب', elements)
-        page.cur_page_number = cur_page_number
-        page.fetch = fetch
         #=============================================================================
         #=========================== Click Functions Initializing ====================
         
-        def search():
-            try:
-                page.fetch : List[BookViewModel] = self.service_provider.book_search(book_name_input_box.content)
-            except ReachedToRequestLimitError:
-                return self.get_request_limited_page()
-                
-            page.cur_page_number = 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
-        
-            start_row = (page.cur_page_number - 1) * 10
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
+        def refresh_books_table():
+            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
+            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            end_row = min(len(page.bag_get('fetch')), end_row)
         
             table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
+                page.bag_get('table_header')
             ]
-            for row in page.fetch[start_row:end_row]:
+            for row in page.bag_get('fetch')[start_row:end_row]:
                 table_row = [
                     Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
                     Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
@@ -665,7 +525,17 @@ class GuestPanel:
             next_button.position.top = books_table.position.bottom + 1
             cur_page.position.top = books_table.position.bottom + 1
             prev_button.position.top = books_table.position.bottom + 1
-            
+
+
+        def search():
+            try:
+                page.bag_set('fetch', self.service_provider.book_search(book_name_input_box.content))
+            except ReachedToRequestLimitError:
+                return self.get_request_limited_page()
+                
+            page.bag_set('cur_page_number', 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
         search_button.click_func = search
         
         def advance_search():
@@ -673,87 +543,34 @@ class GuestPanel:
         advance_search_button.click_func = advance_search
 
         def next():
-            page.cur_page_number += 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
-            
-            start_row = (page.cur_page_number - 1) * 10
-            if start_row >= len(page.fetch):
-                page.cur_page_number -= 1
-                cur_page.content = f'صفحه {page.cur_page_number}'
-                return
-            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                    Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
-                    Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                    Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-                ]
-                table_content.append(table_row)
-            
-            ConsoleExtension.clear_area(books_table.position, page.position)
-            
-            books_table.update(table_content, start_row_id=start_row)
-            books_table.position.left = (150 - books_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = books_table.position.bottom + 1
-            cur_page.position.top = books_table.position.bottom + 1
-            prev_button.position.top = books_table.position.bottom + 1
+            cur_page_number = page.bag_get('cur_page_number', 1)
 
+            start_row = cur_page_number * 10
+            if start_row >= len(page.bag_get('fetch')):
+                return
+
+            page.bag_set('cur_page_number', cur_page_number + 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
         next_button.click_func = next
 
-
         def prev():
-            if page.cur_page_number <= 1:
+            cur_page_number = page.bag_get('cur_page_number', 1)
+            
+            if cur_page_number <= 1:
                 return
-            page.cur_page_number -= 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
             
-            start_row = (page.cur_page_number - 1) * 10            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                    Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
-                    Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                    Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-                ]
-                table_content.append(table_row)
-            
-            ConsoleExtension.clear_area(books_table.position, page.position)
-            
-            books_table.update(table_content, start_row_id=start_row)
-            books_table.position.left = (150 - books_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = books_table.position.bottom + 1
-            cur_page.position.top = books_table.position.bottom + 1
-            prev_button.position.top = books_table.position.bottom + 1
-            
+            page.bag_set('cur_page_number', cur_page_number - 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()   
         prev_button.click_func = prev
-
 
         def back():
             return self.get_homepage()  
         back_button.click_func = back
+
+
+        search()
 
         return page
     
@@ -762,6 +579,17 @@ class GuestPanel:
         
         if not self.service_provider.can_guest_request():
             return self.get_request_limited_page()
+        
+        try:
+            available_categories : List[CategoryViewModel] = self.service_provider.get_all_categories()
+        except ReachedToRequestLimitError:
+            return self.get_request_limited_page()
+        
+        page = self._create_page('جست و جوی پیشرفته کتب')
+        page.bag_set('table_header', [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')])
+        page.bag_set('cur_page_number', 1)
+        page.bag_set('category_names', [category.name for category in available_categories]) 
+        page.bag_set('selected_categories', [])
         
         #=============================================================================
         #=========================== Elements Initializing ===========================       
@@ -793,16 +621,9 @@ class GuestPanel:
             content = 'موضوع',
             position = SizeAndPosition(left = 82, top = 3)
         )
-        try:
-            available_categories : List[CategoryViewModel] = self.service_provider.get_all_categories()
-        except ReachedToRequestLimitError:
-            return self.get_request_limited_page()
-        
-        available_categories = [category.name for category in available_categories]
-        
         category_input_box = InputBox(
             display_text = 'موضوع را وارد کنید',
-            checker = lambda text : (text in available_categories),
+            checker = lambda text : (text in page.bag_get('category_names')),
             position = SizeAndPosition(left = 89, top = 3),
         )
         add_category_button = Button(
@@ -821,14 +642,12 @@ class GuestPanel:
             text = 'مشاهده لیست موضوعات',
             position = SizeAndPosition(top = 4, left = 95)
         )
-        
-        categories = []
+        s_c : List = page.bag_get('selected_categories')
         selected_categories = Text(
-            content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات" if not categories else ", ".join(categories)}', 90),
+            content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات" if not s_c else ", ".join(s_c)}', 90),
             position = SizeAndPosition(top = 5, width = 150),
             halign = 'c'
         )
-        
         search_button = Button(
             text = 'جست و جو',
             position = SizeAndPosition(top = 6, left = 58)
@@ -836,59 +655,33 @@ class GuestPanel:
         fast_search_button = Button(
             text = 'جست و جوی سریع',
             position = SizeAndPosition(top = 6, left = 75)
-        )
-        
+        ) 
         prev_button = Button(
             text = 'قبلی',
             position = SizeAndPosition(top = 30, left = 40)
         )
-        
         next_button = Button(
             text = 'بعدی',
             position = SizeAndPosition(top = 30, left = 100)
         )
-        
-        cur_page_number = 1
-
         cur_page = Text(
-            content = f'صفحه {cur_page_number}',
+            content = f'صفحه {page.bag_get("cur_page_number")}',
             position = SizeAndPosition(top = 30, left = 71)
         )
-        
         back_button = Button(
             text = 'بازگشت',
             position = SizeAndPosition(top = 33, width = 150),
             halign = 'c'
-        )
-        
-        try:
-            fetch : List[BookViewModel] = self.service_provider.book_advance_search()
-        except ReachedToRequestLimitError:
-            return self.get_request_limited_page()
-        
-        start_row = (cur_page_number - 1) * 10
-        end_row = (cur_page_number * 10)
-        end_row = min(len(fetch), end_row)
-        
-        table_content : List[List[Element]] = [
-            [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
+        )              
+        books_table = Table([[]], SizeAndPosition(top = 8))
+        #=============================================================================
+        #=========================== Adding Page Elements ============================
+        page.elements += [
+            book_name, book_name_input_box, author_name, author_input_box, publisher_name, clear_categories_button,
+            publisher_input_box, category_name, category_input_box, add_category_button, selected_categories,
+            remove_category_button, display_categories_button, search_button, fast_search_button, prev_button, next_button, cur_page, back_button, books_table
         ]
-        for row in fetch[start_row:end_row]:
-            table_row = [
-                Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
-                Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-            ]
-            table_content.append(table_row)
-                
-        books_table = Table(table_content, SizeAndPosition(top = 8), start_row_id = start_row)
-        books_table.position.left = (150 - books_table.position.width) // 2
-        
-        next_button.position.top = books_table.position.bottom
-        cur_page.position.top = books_table.position.bottom
-        prev_button.position.top = books_table.position.bottom
-            
+        page.update_focused()
         #=============================================================================
         #=========================== Link Elemnets Together ==========================
         book_name_input_box.linked_elements['d'] = publisher_input_box
@@ -942,78 +735,50 @@ class GuestPanel:
         back_button.linked_elements['u'] = prev_button
         back_button.linked_elements['l'] = prev_button
         back_button.linked_elements['r'] = next_button
-        
-        #=============================================================================
-        #=========================== Page Initializing ===============================
-        elements = [
-            book_name, book_name_input_box, author_name, author_input_box, publisher_name, clear_categories_button,
-            publisher_input_box, category_name, category_input_box, add_category_button, selected_categories,
-            remove_category_button, display_categories_button, search_button, fast_search_button, prev_button, next_button, cur_page, back_button, books_table
-        ]
-        page = self._create_page('صفحه کتب', elements)
-        page.cur_page_number = cur_page_number
-        page.fetch = fetch
-        page.categories = categories
-        
         #=============================================================================
         #=========================== Click Functions Initializing ====================
-        
         def add_category():
             if not category_input_box.check():
                 return
             
-            if category_input_box.content in page.categories:
+            s_c : List = page.bag_get('selected_categories')
+            if category_input_box.content in s_c:
                 return
-
-            page.categories.append(category_input_box.content)
-            selected_categories.content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات" if not page.categories else ", ".join(page.categories)}', 90)
+            s_c.append(category_input_box.content)
+            selected_categories.content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات" if not s_c else ", ".join(s_c)}', 90)
+            page.bag_set('selected_categories', s_c)
             category_input_box.content = ''
-        
         add_category_button.click_func = add_category
 
         def remove_category():
             if not category_input_box.check():
                 return
             
-            if not category_input_box.content in page.categories:
+            s_c : List = page.bag_get('selected_categories')
+            if not category_input_box.content in s_c:
                 return
-
-            page.categories.remove(category_input_box.content)
-            selected_categories.content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات" if not page.categories else ", ".join(page.categories)}', 90)
+            s_c.remove(category_input_box.content)
+            selected_categories.content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات" if not s_c else ", ".join(s_c)}', 90)
+            page.bag_set('selected_categories', s_c)
             category_input_box.content = ''
-        
         remove_category_button.click_func = remove_category
         
         def clear_categories():
-            if not page.categories:
+            if not page.bag_get('selected_categories'):
                 return
-            page.categories.clear()
-            selected_categories.content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات" if not page.categories else ", ".join(page.categories)}', 90)
-         
+            page.bag_set('selected_categories', [])
+            selected_categories.content = ConsoleExtension.short_text(f'موضوعات انتخاب شده: {"تمامی موضوعات"}', 90) 
         clear_categories_button.click_func = clear_categories
 
-        def search():
-            try:
-                page.fetch : List[BookViewModel] = self.service_provider.book_advance_search(
-                    title = book_name_input_box.content,
-                    publisher = publisher_input_box.content,
-                    author = author_input_box.content,
-                    categories = page.categories
-                )
-            except ReachedToRequestLimitError:
-                return self.get_request_limited_page()
-                
-            page.cur_page_number = 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
-        
-            start_row = (page.cur_page_number - 1) * 10
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
+        def refresh_books_table():
+            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
+            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            end_row = min(len(page.bag_get('fetch')), end_row)
         
             table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
+                page.bag_get('table_header')
             ]
-            for row in page.fetch[start_row:end_row]:
+            for row in page.bag_get('fetch')[start_row:end_row]:
                 table_row = [
                     Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
                     Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
@@ -1034,31 +799,46 @@ class GuestPanel:
             next_button.position.top = books_table.position.bottom
             cur_page.position.top = books_table.position.bottom
             prev_button.position.top = books_table.position.bottom
-            
+
+
+        def search():
+            try:
+                fetch : List[BookViewModel] = self.service_provider.book_advance_search(
+                    title = book_name_input_box.content,
+                    publisher = publisher_input_box.content,
+                    author = author_input_box.content,
+                    categories = page.bag_get('selected_categories')
+                )
+                page.bag_set('fetch', fetch)
+            except ReachedToRequestLimitError:
+                return self.get_request_limited_page()
+                
+            page.bag_set('cur_page_number', 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
         search_button.click_func = search
         
         def fast_search():
             return self.get_books_page()
-        
         fast_search_button.click_func = fast_search
         
         def display_categories():
+            category_names : List = page.bag_get('category_names')
+            
             ConsoleExtension.clear_area(books_table.position, page.position)
             
             display_categories_content = "لیست موضوعات:\n\n"
-            for i in range(len(available_categories)):
+            for i in range(len(category_names)):
                 if (i+1) % 10 == 0:
                     display_categories_content += '\n'
-                display_categories_content += f'{available_categories[i]}، '
+                display_categories_content += f'{category_names[i]}، '
             display_categories_content += '\n\nبرای ادامه یک کلید را بفشارید.'
-            
                     
             display_categories_text = Text(
                 content = display_categories_content,
                 position = SizeAndPosition(top = books_table.position.top, width = 150),
                 halign = 'c'
             )
-            
             display_categories_text.render(page.position.top, page.position.left)
             
             time.sleep(0.3)
@@ -1067,92 +847,37 @@ class GuestPanel:
                 if event.event_type == keyboard.KEY_DOWN:
                     ConsoleExtension.clear_area(display_categories_text.position , page.position)
                     break
-         
         display_categories_button.click_func = display_categories
         
-
         def next():
-            page.cur_page_number += 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
-            
-            start_row = (page.cur_page_number - 1) * 10
-            if start_row >= len(page.fetch):
-                page.cur_page_number -= 1
-                cur_page.content = f'صفحه {page.cur_page_number}'
-                return
-            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                    Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
-                    Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                    Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-                ]
-                table_content.append(table_row)
-            
-            ConsoleExtension.clear_area(books_table.position, page.position)
-            
-            books_table.update(table_content, start_row_id=start_row)
-            books_table.position.left = (150 - books_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = books_table.position.bottom
-            cur_page.position.top = books_table.position.bottom
-            prev_button.position.top = books_table.position.bottom
+            cur_page_number = page.bag_get('cur_page_number', 1)
 
+            start_row = cur_page_number * 10
+            if start_row >= len(page.bag_get('fetch')):
+                return
+
+            page.bag_set('cur_page_number', cur_page_number + 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
         next_button.click_func = next
 
-
         def prev():
-            if page.cur_page_number <= 1:
+            cur_page_number = page.bag_get('cur_page_number', 1)
+            
+            if cur_page_number <= 1:
                 return
-            page.cur_page_number -= 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
             
-            start_row = (page.cur_page_number - 1) * 10            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                    Text(ConsoleExtension.short_text(row.publisher, 20),halign='c'),
-                    Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                    Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-                ]
-                table_content.append(table_row)
-            
-            ConsoleExtension.clear_area(books_table.position, page.position)
-            
-            books_table.update(table_content, start_row_id=start_row)
-            books_table.position.left = (150 - books_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = books_table.position.bottom + 1
-            cur_page.position.top = books_table.position.bottom + 1
-            prev_button.position.top = books_table.position.bottom + 1
-            
+            page.bag_set('cur_page_number', cur_page_number - 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()   
         prev_button.click_func = prev
-
 
         def back():
             return self.get_homepage()  
         back_button.click_func = back
+
+
+        search()
 
         return page
     
@@ -1163,48 +888,9 @@ class GuestPanel:
         if not self.service_provider.can_guest_request():
             return self.get_request_limited_page()
         
-        #=============================================================================
-        #=========================== Elements Initializing ===========================       
-        publisher_name_input_box = InputBox(
-            display_text = 'نام ناشر را وارد کنید',
-            position = SizeAndPosition(left = 63, top = 3)
-        )
-      
-        search_button = Button(
-            text = 'جست و جو',
-            position = SizeAndPosition(top = 5, left = 70)
-        )
-                
-        prev_button = Button(
-            text = 'قبلی',
-            position = SizeAndPosition(top = 31, left = 40)
-        )
-        
-        next_button = Button(
-            text = 'بعدی',
-            position = SizeAndPosition(top = 31, left = 100)
-        )
-        
-        cur_page_number = 1
-
-        cur_page = Text(
-            content = f'صفحه {cur_page_number}',
-            position = SizeAndPosition(top = 31, left = 71)
-        )
-        
-        back_button = Button(
-            text = 'بازگشت',
-            position = SizeAndPosition(top = 33, width = 150),
-            halign = 'c'
-        )
-        
-        fetch : List[PublisherViewModel] = self.service_provider.get_all_publishers()
-        start_row = (cur_page_number - 1) * 10
-        end_row = (cur_page_number * 10)
-        end_row = min(len(fetch), end_row)
-        
-        table_content : List[List[Element]] = [
-            [
+        page = self._create_page('صفحه ناشرین')
+        page.bag_set('cur_page_number', 1)
+        page.bag_set('table_header', [
                 Text('نام ناشر',halign='c'),
                 Text('آدرس',halign='c'),
                 Text('ایمیل',halign='c'),
@@ -1212,257 +898,148 @@ class GuestPanel:
                 Text('کتاب ها',halign='c'),
                 Text('جزئیات',halign='c')
             ]
-        ]
-        for row in fetch[start_row:end_row]:
-            table_row = [
-                Text(ConsoleExtension.short_text(row.name, 16), halign='c'),
-                Text(ConsoleExtension.short_text(row.address, 30), halign='c'),
-                Text(ConsoleExtension.short_text(row.contact_email, 25), halign='c'),
-                Text(ConsoleExtension.short_text(row.phone, 16), halign='c'),
-                Text(ConsoleExtension.short_text(row.books, 25), halign='c'),
-                Button('مشاهده جزئیات', halign='c', click_func = lambda r=row: self.get_publisher_detail_page(r))
-            ]
-            table_content.append(table_row)          
-                
-        publishers_table = Table(table_content, SizeAndPosition(top = 7), start_row_id = start_row)
-        publishers_table.position.left = (150 - publishers_table.position.width) // 2
-        
-        next_button.position.top = publishers_table.position.bottom + 1
-        cur_page.position.top = publishers_table.position.bottom + 1
-        prev_button.position.top = publishers_table.position.bottom + 1
-            
+        )
         #=============================================================================
-        #=========================== Link Elemnets Together ==========================
-        
-        table_content[1][5].linked_elements['u'] = search_button
-        table_content[1][5].linked_elements['d'] = table_content[2][5]
-            
-        for i in range(2,10):
-            table_content[i][5].linked_elements['u'] = table_content[i - 1][5]
-            table_content[i][5].linked_elements['d'] = table_content[i + 1][5]
-            
-        table_content[10][5].linked_elements['u'] = table_content[9][5]
-        table_content[10][5].linked_elements['d'] = next_button
-                
+        #=========================== Elements Initializing ===========================       
+        publisher_name_input_box = InputBox(
+            display_text = 'نام ناشر را وارد کنید',
+            position = SizeAndPosition(left = 63, top = 3)
+        )
+        search_button = Button(
+            text = 'جست و جو',
+            position = SizeAndPosition(top = 5, left = 70)
+        )  
+        prev_button = Button(
+            text = 'قبلی',
+            position = SizeAndPosition(top = 31, left = 40)
+        )
+        next_button = Button(
+            text = 'بعدی',
+            position = SizeAndPosition(top = 31, left = 100)
+        )
+        cur_page = Text(
+            content = f'صفحه {page.bag_get("cur_page_number")}',
+            position = SizeAndPosition(top = 31, left = 71)
+        )
+        back_button = Button(
+            text = 'بازگشت',
+            position = SizeAndPosition(top = 33, width = 150),
+            halign = 'c'
+        )
+        publishers_table = Table([[]], SizeAndPosition(top = 7))
+        #=============================================================================
+        #=========================== Adding Page Elements ============================
+        page.elements += [
+            publisher_name_input_box, search_button, prev_button, next_button, cur_page, back_button, publishers_table
+        ]
+        page.update_focused()
+        #=============================================================================
+        #=========================== Link Elemnets Together ==========================             
         publisher_name_input_box.linked_elements['d'] = search_button
-        
+
         search_button.linked_elements['u'] = publisher_name_input_box
-        search_button.linked_elements['d'] = table_content[1][5]
         
-        prev_button.linked_elements['u'] = table_content[10][5]
         prev_button.linked_elements['r'] = next_button
         prev_button.linked_elements['d'] = back_button
         
-        next_button.linked_elements['u'] = table_content[10][5]
         next_button.linked_elements['l'] = prev_button
         next_button.linked_elements['d'] = back_button
         
         back_button.linked_elements['u'] = next_button
         back_button.linked_elements['r'] = next_button
         back_button.linked_elements['l'] = prev_button
-
-        #=============================================================================
-        #=========================== Page Initializing ===============================
-        elements = [
-            publisher_name_input_box, search_button, prev_button, next_button, cur_page, back_button, publishers_table
-        ]
-        page = self._create_page('صفحه ناشرین', elements)
-        page.cur_page_number = cur_page_number
-        page.fetch = fetch
         #=============================================================================
         #=========================== Click Functions Initializing ====================
         
+        def refresh_books_table():
+            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
+            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            end_row = min(len(page.bag_get('fetch')), end_row)
+        
+            table_content : List[List[Element]] = [
+                page.bag_get('table_header')
+            ]
+            for row in page.bag_get('fetch')[start_row:end_row]:
+                table_row = [
+                    Text(ConsoleExtension.short_text(row.name, 16), halign='c'),
+                    Text(ConsoleExtension.short_text(row.address, 30), halign='c'),
+                    Text(ConsoleExtension.short_text(row.contact_email, 25), halign='c'),
+                    Text(ConsoleExtension.short_text(row.phone, 16), halign='c'),
+                    Text(ConsoleExtension.short_text(row.books, 25), halign='c'),
+                    Button('مشاهده جزئیات', halign='c', click_func = lambda r=row: self.get_publisher_detail_page(r))
+                ]
+                table_content.append(table_row) 
+            
+            ConsoleExtension.clear_area(publishers_table.position, page.position)
+            
+            publishers_table.update(table_content, start_row_id=start_row)
+            publishers_table.position.left = (150 - publishers_table.position.width) // 2
+        
+            ConsoleExtension.clear_area(next_button.position, page.position)
+            ConsoleExtension.clear_area(cur_page.position, page.position)
+            ConsoleExtension.clear_area(prev_button.position, page.position)
+            
+            next_button.position.top = publishers_table.position.bottom + 1
+            cur_page.position.top = publishers_table.position.bottom + 1
+            prev_button.position.top = publishers_table.position.bottom + 1
+
+            if len(table_content) <= 1:
+                return
+
+            for i in range(1, len(table_content)):
+                if i == 1:
+                    table_content[i][5].linked_elements['u'] = search_button
+                    search_button.linked_elements['d'] = table_content[i][5]
+                else:
+                    table_content[i][5].linked_elements['u'] = table_content[i - 1][5]
+                if i == len(table_content) - 1:
+                    table_content[i][5].linked_elements['d'] = next_button
+                    prev_button.linked_elements['u'] = table_content[i][5]
+                    next_button.linked_elements['u'] = table_content[i][5]
+                else:
+                    table_content[i][5].linked_elements['d'] = table_content[i + 1][5]
+
         def search():
             try:
-                page.fetch : List[PublisherViewModel] = self.service_provider.publisher_search(publisher_name_input_box.content)
+                fetch : List[PublisherViewModel] = self.service_provider.publisher_search(publisher_name_input_box.content)
+                page.bag_set('fetch', fetch)
             except ReachedToRequestLimitError:
                 return self.get_request_limited_page()
                 
-            page.cur_page_number = 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
-        
-            start_row = (page.cur_page_number - 1) * 10
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [
-                    Text('نام ناشر',halign='c'),
-                    Text('آدرس',halign='c'),
-                    Text('ایمیل',halign='c'),
-                    Text('شماره تماس',halign='c'),
-                    Text('کتاب ها',halign='c'),
-                    Text('جزئیات',halign='c')
-                ]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.name, 16), halign='c'),
-                    Text(ConsoleExtension.short_text(row.address, 30), halign='c'),
-                    Text(ConsoleExtension.short_text(row.contact_email, 25), halign='c'),
-                    Text(ConsoleExtension.short_text(row.phone, 16), halign='c'),
-                    Text(ConsoleExtension.short_text(row.books, 25), halign='c'),
-                    Button('مشاهده جزئیات',halign='c', click_func = lambda r=row: self.get_publisher_detail_page(r))
-                ]
-                table_content.append(table_row)
-                
-            table_content[1][5].linked_elements['u'] = search_button
-            table_content[1][5].linked_elements['d'] = table_content[2][5]
-            
-            for i in range(2,10):
-                table_content[i][5].linked_elements['u'] = table_content[i - 1][5]
-                table_content[i][5].linked_elements['d'] = table_content[i + 1][5]
-            
-            table_content[10][5].linked_elements['u'] = table_content[9][5]
-            table_content[10][5].linked_elements['d'] = next_button
-            
-            search_button.linked_elements['d'] = table_content[1][5]
-            prev_button.linked_elements['u'] = table_content[10][5]
-            next_button.linked_elements['u'] = table_content[10][5]
-            
-            ConsoleExtension.clear_area(publishers_table.position, page.position)
-            
-            publishers_table.update(table_content, start_row_id=start_row)
-            publishers_table.position.left = (150 - publishers_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = publishers_table.position.bottom + 1
-            cur_page.position.top = publishers_table.position.bottom + 1
-            prev_button.position.top = publishers_table.position.bottom + 1
-            
+            page.bag_set('cur_page_number', 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
         search_button.click_func = search
         
         def next():
-            page.cur_page_number += 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
-            
-            start_row = (page.cur_page_number - 1) * 10
-            if start_row >= len(page.fetch):
-                page.cur_page_number -= 1
-                cur_page.content = f'صفحه {page.cur_page_number}'
-                return
-            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [
-                    Text('نام ناشر',halign='c'),
-                    Text('آدرس',halign='c'),
-                    Text('ایمیل',halign='c'),
-                    Text('شماره تماس',halign='c'),
-                    Text('کتاب ها',halign='c'),
-                    Text('جزئیات',halign='c')
-                ]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.name, 16), halign='c'),
-                    Text(ConsoleExtension.short_text(row.address, 30), halign='c'),
-                    Text(ConsoleExtension.short_text(row.contact_email, 25), halign='c'),
-                    Text(ConsoleExtension.short_text(row.phone, 16), halign='c'),
-                    Text(ConsoleExtension.short_text(row.books, 25), halign='c'),
-                    Button('مشاهده جزئیات', halign='c', click_func = lambda r=row: self.get_publisher_detail_page(r))
-                ]
-                table_content.append(table_row)
-                
-            table_content[1][5].linked_elements['u'] = search_button
-            table_content[1][5].linked_elements['d'] = table_content[2][5]
-            
-            for i in range(2,10):
-                table_content[i][5].linked_elements['u'] = table_content[i - 1][5]
-                table_content[i][5].linked_elements['d'] = table_content[i + 1][5]
-            
-            table_content[10][5].linked_elements['u'] = table_content[9][5]
-            table_content[10][5].linked_elements['d'] = next_button
-            
-            search_button.linked_elements['d'] = table_content[1][5]
-            prev_button.linked_elements['u'] = table_content[10][5]
-            next_button.linked_elements['u'] = table_content[10][5]
-            
-            ConsoleExtension.clear_area(publishers_table.position, page.position)
-            
-            publishers_table.update(table_content, start_row_id=start_row)
-            publishers_table.position.left = (150 - publishers_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = publishers_table.position.bottom + 1
-            cur_page.position.top = publishers_table.position.bottom + 1
-            prev_button.position.top = publishers_table.position.bottom + 1
+            cur_page_number = page.bag_get('cur_page_number', 1)
 
+            start_row = cur_page_number * 10
+            if start_row >= len(page.bag_get('fetch')):
+                return
+
+            page.bag_set('cur_page_number', cur_page_number + 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
         next_button.click_func = next
 
-
         def prev():
-            if page.cur_page_number <= 1:
+            cur_page_number = page.bag_get('cur_page_number', 1)
+            
+            if cur_page_number <= 1:
                 return
-            page.cur_page_number -= 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
             
-            start_row = (page.cur_page_number - 1) * 10            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [
-                    Text('نام ناشر',halign='c'),
-                    Text('آدرس',halign='c'),
-                    Text('ایمیل',halign='c'),
-                    Text('شماره تماس',halign='c'),
-                    Text('کتاب ها',halign='c'),
-                    Text('جزئیات',halign='c')
-                ]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.name, 16), halign='c'),
-                    Text(ConsoleExtension.short_text(row.address, 30), halign='c'),
-                    Text(ConsoleExtension.short_text(row.contact_email, 25), halign='c'),
-                    Text(ConsoleExtension.short_text(row.phone, 16), halign='c'),
-                    Text(ConsoleExtension.short_text(row.books, 25), halign='c'),
-                    Button('مشاهده جزئیات', halign='c', click_func = lambda r=row: self.get_publisher_detail_page(r))
-                ]
-                table_content.append(table_row)
-            
-            table_content[1][5].linked_elements['u'] = search_button
-            table_content[1][5].linked_elements['d'] = table_content[2][5]
-            
-            for i in range(2,10):
-                table_content[i][5].linked_elements['u'] = table_content[i - 1][5]
-                table_content[i][5].linked_elements['d'] = table_content[i + 1][5]
-            
-            table_content[10][5].linked_elements['u'] = table_content[9][5]
-            table_content[10][5].linked_elements['d'] = next_button
-            
-            search_button.linked_elements['d'] = table_content[1][5]
-            prev_button.linked_elements['u'] = table_content[10][5]
-            next_button.linked_elements['u'] = table_content[10][5]
-
-            ConsoleExtension.clear_area(publishers_table.position, page.position)
-            
-            publishers_table.update(table_content, start_row_id=start_row)
-            publishers_table.position.left = (150 - publishers_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = publishers_table.position.bottom + 1
-            cur_page.position.top = publishers_table.position.bottom + 1
-            prev_button.position.top = publishers_table.position.bottom + 1
-            
+            page.bag_set('cur_page_number', cur_page_number - 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()   
         prev_button.click_func = prev
 
 
         def back():
             return self.get_homepage()  
         back_button.click_func = back
+
+        search()
 
         return page
     
@@ -1472,6 +1049,10 @@ class GuestPanel:
         
         if not self.service_provider.can_guest_request():
             return self.get_request_limited_page()
+
+        page = self._create_page(publisher.name)
+        page.bag_set('cur_page_number', 1)
+        page.bag_set('table_header', [Text('عنوان',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')])
                 
         #=============================================================================
         #=========================== Elements Initializing ===========================       
@@ -1483,56 +1064,32 @@ class GuestPanel:
             position = SizeAndPosition(top = 2, left = 44, width = 61),
             halign = 'c'
         ) 
-        
         prev_button = Button(
             text = 'قبلی',
             position = SizeAndPosition(top = 31, left = 40)
         )
-        
         next_button = Button(
             text = 'بعدی',
             position = SizeAndPosition(top = 31, left = 100)
         )
-        
-        cur_page_number = 1
-
         cur_page = Text(
-            content = f'صفحه {cur_page_number}',
+            content = f'صفحه {page.bag_get("cur_page_number")}',
             position = SizeAndPosition(top = 31, left = 71)
         )
-        
         back_button = Button(
             text = 'بازگشت',
             position = SizeAndPosition(top = 33, width = 150),
             halign = 'c'
         )
-        
-        fetch : List[BookViewModel] = self.service_provider.book_advance_search(publisher = publisher.name)
-        start_row = (cur_page_number - 1) * 10
-        end_row = (cur_page_number * 10)
-        end_row = min(len(fetch), end_row)
-        
-        table_content : List[List[Element]] = [
-            [Text('عنوان',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
+        books_table = Table([[]], SizeAndPosition(top = 8))            
+        #=============================================================================
+        #=========================== Adding Page Elements ============================
+        page.elements += [
+            publisher_info, prev_button, next_button, cur_page, back_button, books_table
         ]
-        for row in fetch[start_row:end_row]:
-            table_row = [
-                Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-            ]
-            table_content.append(table_row)
-                
-        books_table = Table(table_content, SizeAndPosition(top = 8), start_row_id = start_row)
-        books_table.position.left = (150 - books_table.position.width) // 2
-        
-        next_button.position.top = books_table.position.bottom
-        cur_page.position.top = books_table.position.bottom
-        prev_button.position.top = books_table.position.bottom
-            
+        page.update_focused()
         #=============================================================================
         #=========================== Link Elemnets Together ==========================
-                        
         prev_button.linked_elements['r'] = next_button
         prev_button.linked_elements['d'] = back_button
         
@@ -1542,35 +1099,17 @@ class GuestPanel:
         back_button.linked_elements['u'] = next_button
         back_button.linked_elements['r'] = next_button
         back_button.linked_elements['l'] = prev_button
-
-        #=============================================================================
-        #=========================== Page Initializing ===============================
-        elements = [
-            publisher_info, prev_button, next_button, cur_page, back_button, books_table
-        ]
-        page = self._create_page(f'{publisher.name}', elements)
-        page.cur_page_number = cur_page_number
-        page.fetch = fetch
         #=============================================================================
         #=========================== Click Functions Initializing ====================
-        
-        def next():
-            page.cur_page_number += 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
-            
-            start_row = (page.cur_page_number - 1) * 10
-            if start_row >= len(page.fetch):
-                page.cur_page_number -= 1
-                cur_page.content = f'صفحه {page.cur_page_number}'
-                return
-            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
+        def refresh_books_table():
+            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
+            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            end_row = min(len(page.bag_get('fetch')), end_row)
+
             table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
+                page.bag_get('table_header')
             ]
-            for row in page.fetch[start_row:end_row]:
+            for row in page.bag_get('fetch')[start_row:end_row]:
                 table_row = [
                     Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
                     Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
@@ -1587,52 +1126,49 @@ class GuestPanel:
             ConsoleExtension.clear_area(cur_page.position, page.position)
             ConsoleExtension.clear_area(prev_button.position, page.position)
             
-            next_button.position.top = books_table.position.bottom + 1
-            cur_page.position.top = books_table.position.bottom + 1
-            prev_button.position.top = books_table.position.bottom + 1
+            next_button.position.top = books_table.position.bottom
+            cur_page.position.top = books_table.position.bottom
+            prev_button.position.top = books_table.position.bottom
+        
+        def search():
+            try:
+                fetch : List[BookViewModel] = self.service_provider.book_advance_search(publisher = publisher.name)
+                page.bag_set('fetch', fetch)
+            except ReachedToRequestLimitError:
+                return self.get_request_limited_page()
+                
+            page.bag_set('cur_page_number', 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
 
+        def next():
+            cur_page_number = page.bag_get('cur_page_number', 1)
+
+            start_row = cur_page_number * 10
+            if start_row >= len(page.bag_get('fetch')):
+                return
+
+            page.bag_set('cur_page_number', cur_page_number + 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()
         next_button.click_func = next
 
-
         def prev():
-            if page.cur_page_number <= 1:
+            cur_page_number = page.bag_get('cur_page_number', 1)
+            
+            if cur_page_number <= 1:
                 return
-            page.cur_page_number -= 1
-            cur_page.content = f'صفحه {page.cur_page_number}'
             
-            start_row = (page.cur_page_number - 1) * 10            
-            end_row = (page.cur_page_number * 10)
-            end_row = min(len(page.fetch), end_row)
-        
-            table_content : List[List[Element]] = [
-                [Text('عنوان',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')]
-            ]
-            for row in page.fetch[start_row:end_row]:
-                table_row = [
-                    Text(ConsoleExtension.short_text(row.title, 30),halign='c'),
-                    Text(ConsoleExtension.short_text(row.author, 35),halign='c'),
-                    Text(ConsoleExtension.short_text(row.category, 50),halign='c')
-                ]
-                table_content.append(table_row)
-            
-            ConsoleExtension.clear_area(books_table.position, page.position)
-            
-            books_table.update(table_content, start_row_id=start_row)
-            books_table.position.left = (150 - books_table.position.width) // 2
-        
-            ConsoleExtension.clear_area(next_button.position, page.position)
-            ConsoleExtension.clear_area(cur_page.position, page.position)
-            ConsoleExtension.clear_area(prev_button.position, page.position)
-            
-            next_button.position.top = books_table.position.bottom + 1
-            cur_page.position.top = books_table.position.bottom + 1
-            prev_button.position.top = books_table.position.bottom + 1
-            
+            page.bag_set('cur_page_number', cur_page_number - 1)
+            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            refresh_books_table()   
         prev_button.click_func = prev
 
 
         def back():
             return self.get_publishers_page()  
         back_button.click_func = back
+
+        search()
 
         return page
