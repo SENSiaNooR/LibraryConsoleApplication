@@ -1,10 +1,10 @@
 ﻿import time
-from typing import List
-
 import keyboard
+from typing import List
 from Core.Validations import Validations
 from Exceptions.Exceptions import ReachedToRequestLimitError
 from Models.Models import BookViewModel, CategoryViewModel, MemberModel, PlainUserModel, PublisherViewModel
+from Presentation.ConsoleUI.Components.PageHelper import PageHelper
 from Presentation.ConsoleUI.Components.ConsoleExtension import ConsoleExtension
 from Presentation.ConsoleUI.Components.Element import Element
 from Presentation.ConsoleUI.Components.InputBox import InputBox
@@ -439,7 +439,7 @@ class GuestPanel:
         
         page = self._create_page('صفحه کتب')
         page.bag_set('table_header', [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')])
-        page.bag_set('cur_page_number', 1)
+        page.bag_set('table_page', 1)
         #=============================================================================
         #=========================== Elements Initializing ===========================       
         book_name_input_box = InputBox(
@@ -460,7 +460,7 @@ class GuestPanel:
             position = SizeAndPosition(top = 31, left = 40)
         )
         cur_page = Text(
-            content = f'صفحه {page.bag_get("cur_page_number")}',
+            content = f'صفحه {page.bag_get("table_page")}',
             position = SizeAndPosition(top = 31, left = 71)
         )
         next_button = Button(
@@ -497,8 +497,8 @@ class GuestPanel:
         #=========================== Click Functions Initializing ====================
         
         def refresh_books_table():
-            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
-            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            start_row = (page.bag_get("table_page", 1) - 1) * 10
+            end_row = (page.bag_get("table_page", 1) * 10)
             end_row = min(len(page.bag_get('fetch')), end_row)
         
             table_content : List[List[Element]] = [
@@ -533,8 +533,8 @@ class GuestPanel:
             except ReachedToRequestLimitError:
                 return self.get_request_limited_page()
                 
-            page.bag_set('cur_page_number', 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            page.bag_set('table_page', 1)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
         search_button.click_func = search
         
@@ -543,25 +543,14 @@ class GuestPanel:
         advance_search_button.click_func = advance_search
 
         def next():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-
-            start_row = cur_page_number * 10
-            if start_row >= len(page.bag_get('fetch')):
-                return
-
-            page.bag_set('cur_page_number', cur_page_number + 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_next_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
         next_button.click_func = next
 
         def prev():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-            
-            if cur_page_number <= 1:
-                return
-            
-            page.bag_set('cur_page_number', cur_page_number - 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_prev_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()   
         prev_button.click_func = prev
 
@@ -569,9 +558,7 @@ class GuestPanel:
             return self.get_homepage()  
         back_button.click_func = back
 
-
         search()
-
         return page
     
     #==================================== Advance Book Page =================================
@@ -587,7 +574,7 @@ class GuestPanel:
         
         page = self._create_page('جست و جوی پیشرفته کتب')
         page.bag_set('table_header', [Text('عنوان',halign='c'), Text('ناشر',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')])
-        page.bag_set('cur_page_number', 1)
+        page.bag_set('table_page', 1)
         page.bag_set('category_names', [category.name for category in available_categories]) 
         page.bag_set('selected_categories', [])
         
@@ -665,7 +652,7 @@ class GuestPanel:
             position = SizeAndPosition(top = 30, left = 100)
         )
         cur_page = Text(
-            content = f'صفحه {page.bag_get("cur_page_number")}',
+            content = f'صفحه {page.bag_get("table_page")}',
             position = SizeAndPosition(top = 30, left = 71)
         )
         back_button = Button(
@@ -771,8 +758,8 @@ class GuestPanel:
         clear_categories_button.click_func = clear_categories
 
         def refresh_books_table():
-            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
-            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            start_row = (page.bag_get("table_page", 1) - 1) * 10
+            end_row = (page.bag_get("table_page", 1) * 10)
             end_row = min(len(page.bag_get('fetch')), end_row)
         
             table_content : List[List[Element]] = [
@@ -813,8 +800,8 @@ class GuestPanel:
             except ReachedToRequestLimitError:
                 return self.get_request_limited_page()
                 
-            page.bag_set('cur_page_number', 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            page.bag_set('table_page', 1)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
         search_button.click_func = search
         
@@ -850,25 +837,14 @@ class GuestPanel:
         display_categories_button.click_func = display_categories
         
         def next():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-
-            start_row = cur_page_number * 10
-            if start_row >= len(page.bag_get('fetch')):
-                return
-
-            page.bag_set('cur_page_number', cur_page_number + 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_next_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
         next_button.click_func = next
 
         def prev():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-            
-            if cur_page_number <= 1:
-                return
-            
-            page.bag_set('cur_page_number', cur_page_number - 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_prev_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()   
         prev_button.click_func = prev
 
@@ -876,11 +852,8 @@ class GuestPanel:
             return self.get_homepage()  
         back_button.click_func = back
 
-
         search()
-
         return page
-    
 
     #==================================== Publishers Page =================================
     def get_publishers_page(self):
@@ -889,7 +862,7 @@ class GuestPanel:
             return self.get_request_limited_page()
         
         page = self._create_page('صفحه ناشرین')
-        page.bag_set('cur_page_number', 1)
+        page.bag_set('table_page', 1)
         page.bag_set('table_header', [
                 Text('نام ناشر',halign='c'),
                 Text('آدرس',halign='c'),
@@ -918,7 +891,7 @@ class GuestPanel:
             position = SizeAndPosition(top = 31, left = 100)
         )
         cur_page = Text(
-            content = f'صفحه {page.bag_get("cur_page_number")}',
+            content = f'صفحه {page.bag_get("table_page")}',
             position = SizeAndPosition(top = 31, left = 71)
         )
         back_button = Button(
@@ -952,8 +925,8 @@ class GuestPanel:
         #=========================== Click Functions Initializing ====================
         
         def refresh_books_table():
-            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
-            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            start_row = (page.bag_get("table_page", 1) - 1) * 10
+            end_row = (page.bag_get("table_page", 1) * 10)
             end_row = min(len(page.bag_get('fetch')), end_row)
         
             table_content : List[List[Element]] = [
@@ -1006,44 +979,30 @@ class GuestPanel:
             except ReachedToRequestLimitError:
                 return self.get_request_limited_page()
                 
-            page.bag_set('cur_page_number', 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            page.bag_set('table_page', 1)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
         search_button.click_func = search
         
         def next():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-
-            start_row = cur_page_number * 10
-            if start_row >= len(page.bag_get('fetch')):
-                return
-
-            page.bag_set('cur_page_number', cur_page_number + 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_next_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
         next_button.click_func = next
 
         def prev():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-            
-            if cur_page_number <= 1:
-                return
-            
-            page.bag_set('cur_page_number', cur_page_number - 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_prev_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()   
         prev_button.click_func = prev
-
 
         def back():
             return self.get_homepage()  
         back_button.click_func = back
 
         search()
-
         return page
     
-
     #==================================== Publisher Detail Page =================================
     def get_publisher_detail_page(self, publisher : PublisherViewModel):
         
@@ -1051,7 +1010,7 @@ class GuestPanel:
             return self.get_request_limited_page()
 
         page = self._create_page(publisher.name)
-        page.bag_set('cur_page_number', 1)
+        page.bag_set('table_page', 1)
         page.bag_set('table_header', [Text('عنوان',halign='c'), Text('نویسندگان',halign='c'), Text('دسته بندی ها',halign='c')])
                 
         #=============================================================================
@@ -1073,7 +1032,7 @@ class GuestPanel:
             position = SizeAndPosition(top = 31, left = 100)
         )
         cur_page = Text(
-            content = f'صفحه {page.bag_get("cur_page_number")}',
+            content = f'صفحه {page.bag_get("table_page")}',
             position = SizeAndPosition(top = 31, left = 71)
         )
         back_button = Button(
@@ -1102,8 +1061,8 @@ class GuestPanel:
         #=============================================================================
         #=========================== Click Functions Initializing ====================
         def refresh_books_table():
-            start_row = (page.bag_get("cur_page_number", 1) - 1) * 10
-            end_row = (page.bag_get("cur_page_number", 1) * 10)
+            start_row = (page.bag_get("table_page", 1) - 1) * 10
+            end_row = (page.bag_get("table_page", 1) * 10)
             end_row = min(len(page.bag_get('fetch')), end_row)
 
             table_content : List[List[Element]] = [
@@ -1137,38 +1096,26 @@ class GuestPanel:
             except ReachedToRequestLimitError:
                 return self.get_request_limited_page()
                 
-            page.bag_set('cur_page_number', 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            page.bag_set('table_page', 1)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
 
         def next():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-
-            start_row = cur_page_number * 10
-            if start_row >= len(page.bag_get('fetch')):
-                return
-
-            page.bag_set('cur_page_number', cur_page_number + 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_next_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()
         next_button.click_func = next
 
         def prev():
-            cur_page_number = page.bag_get('cur_page_number', 1)
-            
-            if cur_page_number <= 1:
-                return
-            
-            page.bag_set('cur_page_number', cur_page_number - 1)
-            cur_page.content = f'صفحه {page.bag_get("cur_page_number", 1)}'
+            PageHelper.table_prev_func(page, 'fetch', 'table_page', 10)
+            cur_page.content = f'صفحه {page.bag_get("table_page", 1)}'
             refresh_books_table()   
         prev_button.click_func = prev
-
 
         def back():
             return self.get_publishers_page()  
         back_button.click_func = back
 
         search()
-
         return page
+

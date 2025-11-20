@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from uuid import UUID
@@ -11,6 +11,8 @@ from psycopg2.extensions import register_adapter, AsIs
 class UnsetType:
     def __repr__(self) -> str:
         return '<UNSET>'
+    def __str__(self):
+        return 'Unassign'
 
 UNSET = UnsetType()
 

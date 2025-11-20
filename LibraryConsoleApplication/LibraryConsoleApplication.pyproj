@@ -58,6 +58,7 @@
     <Compile Include="Presentation\ConsoleUI\Components\Element.py" />
     <Compile Include="Presentation\ConsoleUI\Components\InputBox.py" />
     <Compile Include="Presentation\ConsoleUI\Components\Page.py" />
+    <Compile Include="Presentation\ConsoleUI\Components\PageHelper.py" />
     <Compile Include="Presentation\ConsoleUI\Components\SizeAndPosition.py" />
     <Compile Include="Presentation\ConsoleUI\Components\Table.py" />
     <Compile Include="Presentation\ConsoleUI\Components\Text.py" />
