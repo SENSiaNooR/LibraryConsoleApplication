@@ -1,4 +1,4 @@
-﻿from typing import List, Any
+﻿from typing import List, Any, Optional
 import time
 import math
 import shutil
@@ -99,23 +99,32 @@ class Page:
             clickables += [element for element in elements if element.clickable]
         return clickables
 
-    def update_focused(self):
-        """Ensure exactly one focusable element is active (if any exist)."""
+    def update_focused(self, selective_element: Optional[Element] = None):
         focusables = self.__get_focusables()
         if not focusables:
             return
 
-        focused_elements = [focused for focused in focusables if focused.is_focused()]
-        if not focused_elements:
-            focusables[0].focus()
+        # Validate selective element
+        if selective_element not in focusables:
+            selective_element = None
+
+        currently_focused = [f for f in focusables if f.is_focused()]
+
+        # Case: nothing is focused yet
+        if not currently_focused:
+            (selective_element or focusables[0]).focus()
             return
 
-        if len(focused_elements) == 1:
+        # Case: everything is correct and no override requested
+        if len(currently_focused) == 1 and selective_element is None:
             return
 
-        for e in focused_elements:
-            e.unfocus()
-        focusables[0].focus()
+        # Reset focus
+        for f in currently_focused:
+            f.unfocus()
+
+        # Apply new focus
+        (selective_element or focusables[0]).focus()
 
     def add_element(self, element: Element):
         """Add a new element to the page and optionally resize."""

@@ -1,0 +1,5 @@
+a = 'd'
+if a:
+    print('sdcn')
+else:
+    print('s')

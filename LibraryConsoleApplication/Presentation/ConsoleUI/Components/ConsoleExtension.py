@@ -131,7 +131,37 @@ class ConsoleExtension:
         else:
             first_line = text
         return first_line if len(first_line) <= n else first_line[:n - 3] + "..."
-        
+    
+    @staticmethod
+    def wrap_text(text: str, max_lines: int, max_chars_per_line: int):
+        original_lines = text.split("\n")  # حفظ خطوط اصلی
+        wrapped_lines = []
+
+        for line in original_lines:
+            words = line.split()
+            current_line = ""
+
+            for word in words:
+                if len(current_line) + len(word) + (1 if current_line else 0) <= max_chars_per_line:
+                    current_line += (" " if current_line else "") + word
+                else:
+                    wrapped_lines.append(current_line)
+                    current_line = word
+
+                    if len(wrapped_lines) == max_lines:
+                        wrapped_lines[-1] = wrapped_lines[-1][:max_chars_per_line - 3] + "..."
+                        return "\n".join(wrapped_lines)
+
+            # آخرین خط این بخش
+            if current_line:
+                wrapped_lines.append(current_line)
+                if len(wrapped_lines) == max_lines and (len(words) > 0 or len(original_lines) > 1):
+                    # یعنی متن ادامه داشته
+                    wrapped_lines[-1] = wrapped_lines[-1][:max_chars_per_line - 3] + "..."
+                    return "\n".join(wrapped_lines)
+
+        return "\n".join(wrapped_lines)
+
     @staticmethod
     def print_table(
         top_offset: int,
