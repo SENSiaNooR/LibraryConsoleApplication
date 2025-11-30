@@ -333,11 +333,11 @@ class GuestPanel:
             )
             
             try:
-                token = AuthServices.signup(plain_user, member_model)
+                login_res = AuthServices.signup(plain_user, member_model)
             except Exception as ex:
                 error_text.content = str(ex)
             else:
-                print(token)        
+                return login_res    
         signup_button.click_func = signup
          
         def login():
@@ -433,8 +433,7 @@ class GuestPanel:
                 error_text.content = str(ex)
                 return
             else:
-                print(login_res)
-                return  
+                return login_res 
         login_button.click_func = login
         
         def back():

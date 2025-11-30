@@ -1,4 +1,4 @@
-from Core.JWT import JWTManager
+﻿from Core.JWT import JWTManager
 from DataAccess.GuestRepository import GuestRepository
 from DataAccess.MemberRepository import MemberRepository
 from DataAccess.UserRepository import UserRepository
@@ -21,7 +21,7 @@ class AuthServices:
         return LoginResult(token, user)
     
     @classmethod
-    def login_as_guest(cls) -> str:
+    def login_as_guest(cls) -> LoginResult:
         guest = GuestRepository.add()
         
         jwt_manager = JWTManager()
@@ -35,7 +35,7 @@ class AuthServices:
         
         token = jwt_manager.create_token(user.__dict__)
         
-        return token
+        return LoginResult(token, UserWithoutPasswordViewModel(user_type='guest'))
     
     @classmethod
     def signup(cls, plain_user: PlainUserModel, member_model: MemberModel) -> LoginResult:
